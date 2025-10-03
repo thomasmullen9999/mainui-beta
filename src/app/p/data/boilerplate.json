@@ -1,0 +1,304 @@
+[
+  {
+    "heading": "Is it within 10 weeks",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "dateleft10wks",
+        "hint": "Date Left",
+        "type": "Date",
+        "condition": "calculateDayDistances(formData['dateleft10wks'].value) <= 70 ",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Question",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "appleColor",
+        "hint": "Q1",
+        "type": "question",
+        "question": "What is the colour of an apple?",
+        "options": ["red", "green", "blue", "orange"],
+        "allowedAnswer": ["red", "green"],
+        "selectsearch_options": [],
+        "condition": "true"
+      }
+    ]
+  },
+  {
+    "heading": "Gender",
+    "descriptions": "are you good looking",
+    "fields": [
+      {
+        "label": "gender",
+        "type": "question",
+        "hint": "Gender",
+        "question": "",
+        "selectsearch_options": [],
+        "options": ["Male", "Female"],
+        "allowedAnswer": ["Male", "Female"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Step Personal info",
+        "if_condition": "formData['gender'].value === 'Male'"
+      },
+      {
+        "headingTo": "SorryPage",
+        "if_condition": "formData['gender'].value === 'Female'"
+      }
+    ]
+  },
+  {
+    "heading": "Step Personal info",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "lastname",
+        "hint": "Last Name",
+        "type": "text",
+        "condition": "formData['lastname'].value !== ''",
+        "selectsearch_options": [],
+        "options": []
+      },
+      {
+        "label": "firstname",
+        "hint": "First Name",
+        "type": "text",
+        "condition": "formData['firstname'].value !== ''",
+        "selectsearch_options": [],
+        "options": []
+      },
+      {
+        "label": "phonenumber",
+        "hint": "Phone Number",
+        "type": "phone",
+        "condition": "formData['phonenumber'].value !== ''",
+        "selectsearch_options": [],
+        "options": []
+      },
+      {
+        "label": "email",
+        "hint": "Email",
+        "type": "email",
+        "condition": "formData['email'].value !== ''",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Country",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "country",
+        "type": "question",
+        "hint": "Country",
+        "question": "",
+        "selectsearch_options": [],
+        "options": ["Iceland", "UK"],
+        "allowedAnswer": ["Iceland", "UK"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Gender",
+        "if_condition": "formData['country'].value === 'Iceland'"
+      },
+      {
+        "headingTo": "When Is Your Date of Birth?",
+        "if_condition": "formData['country'].value === 'UK'"
+      }
+    ]
+  },
+  {
+    "heading": "Store location",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "storelocation",
+        "type": "selectsearch",
+        "hint": "Store Location",
+        "question": "",
+        "selectsearch_options": [
+          {
+            "value": "abbey_park",
+            "label": "Abbey Park"
+          },
+          {
+            "value": "aberdare",
+            "label": "Aberdare (reject this store for example)"
+          },
+          {
+            "value": "aberdeen_beach",
+            "label": "Aberdeen Beach"
+          },
+          {
+            "value": "glossop",
+            "label": "Glossop Beach"
+          }
+        ],
+        "options": [],
+        "allowedAnswer": [],
+        "condition": "formData['storelocation'].value !== '' && !['aberdare', '2', '3'].includes(formData['storelocation'].value)"
+      }
+    ]
+  },
+
+  {
+    "heading": "When Is Your Date of Birth?",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "dob",
+        "hint": "Date of Birth",
+        "type": "dob",
+        "condition": "true",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Is it within 7 days",
+        "if_condition": "calculateAge(formData['dob'].value) >= 18"
+      },
+      {
+        "headingTo": "SorryPage",
+        "if_condition": "calculateAge(formData['dob'].value) < 18"
+      }
+    ]
+  },
+
+  {
+    "heading": "Is it within 7 days",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "dateleft",
+        "hint": "Date Left",
+        "type": "Date",
+        "condition": "calculateDayDistances(formData['dateleft'].value) <= 7 ",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ]
+  },
+
+  {
+    "heading": "Is it within 6 months",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "dateleft6mnths",
+        "hint": "Date Left",
+        "type": "Date",
+        "condition": "calculateDayDistances(formData['dateleft6mnths'].value) <= 165 ",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ]
+  },
+
+  {
+    "heading": "Did You Sign Up To Work With Just Eat (Using The Just Eat Courier App) As A Self-Employed Independent Contractor Or Salaried Worker?",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "q2",
+        "hint": "Q2",
+        "type": "question",
+        "question": "Please note that you must have delivered directly for Just Eat using the Just Eat courier app and not only, for example, using the Stuart app.        ",
+        "options": ["1", "2"],
+        "allowedAnswer": ["2"],
+        "selectsearch_options": [],
+        "condition": "true"
+      }
+    ]
+  },
+
+  {
+    "heading": "Phone Number",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "telphone",
+        "hint": "Phone",
+        "type": "phone",
+        "condition": "formData['telphone'].value !== ''",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "address",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "address",
+        "hint": "Address",
+        "type": "address",
+        "condition": "formData['address'].value !== ''",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "AcceptDBA",
+    "descriptions": "DBA here",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "",
+        "type": "agreement",
+        "condition": "true",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ],
+    "decisionType": "next"
+  },
+  {
+    "heading": "Thank you",
+    "descriptions": "thank you page here",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "https://www.google.com",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorryPage",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "https://www.google.com",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  }
+]

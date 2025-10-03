@@ -1,0 +1,205 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  // Optional for WebAuthn support
+  Authenticator Authenticator[]
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+ 
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+ 
+// Optional for WebAuthn support
+model Authenticator {
+  id                   String  @id @default(cuid())
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  published Boolean  @default(false)
+  title     String   @db.VarChar(255)
+  
+  authorId  Int?
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+
+model Todo {
+
+ id String @id @default(uuid())
+  title String
+  complete Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  address   String
+  createdAt    DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(6)
+}
+
+model LeadMeta {
+  id  String @id @default(uuid())
+  ipAddress String?  // Adding the ipAddress field
+  browserSpec String?
+  referer String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StoreLocation{
+  id  String @id @default(uuid())
+  store_idx String?
+  store_name String
+}
+
+
+enum LeadStatus {
+  new
+  nurture
+  sold
+}
+
+model LeadHistory{
+  id  String @id @default(uuid())
+  lead_id String?
+  lead_email String?
+  lead_name String?
+  lead_phone String?
+  lead_address String?
+  lead_campaign String?
+  lead_status LeadStatus?
+  lead_sold_timestamp DateTime?
+  lead_sold_timestamp_txt String?
+  lead_source String?
+  lead_created_at DateTime?
+  lead_updated_at DateTime?
+  lead_meta_id String?
+  lead_meta_ip_address String?
+  lead_meta_browser_spec String?
+  lead_meta_referer String?
+  store_location_id String?
+  store_location_store_idx String?
+  store_location_store_name String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  formData  Json?
+  marketingData  Json?
+  apiData  Json?
+  jsonData  Json?
+  apiCallsHistory Json[] @default([])
+}
+
+model DroppedLead{
+  id  String @id @default(cuid())
+  lead_id String?
+  lead_email String?
+  lead_name String?
+  lead_phone String?
+  lead_address String?
+  lead_campaign String?
+  lead_status LeadStatus?
+  lead_sold_timestamp DateTime?
+  lead_sold_timestamp_txt String?
+  lead_source String?
+  lead_created_at DateTime?
+  lead_updated_at DateTime?
+  lead_meta_id String?
+  lead_meta_ip_address String?
+  lead_meta_browser_spec String?
+  lead_meta_referer String?
+  store_location_id String?
+  store_location_store_idx String?
+  store_location_store_name String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  formData  Json?
+  marketingData  Json?
+  apiData  Json?
+  jsonData  Json?
+  apiCallsHistory Json[] @default([])
+}
+
+model migrationLog {
+  key       String   @id
+  createdAt DateTime @default(now())
+}

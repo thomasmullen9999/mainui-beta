@@ -1,0 +1,32 @@
+[
+  {
+    "heading": "Thank you",
+    "descriptions": "thank you page here",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "https://www.google.com",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorryPage",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "https://www.google.com",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  }
+]

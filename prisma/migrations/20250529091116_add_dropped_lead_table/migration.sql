@@ -1,0 +1,32 @@
+-- CreateTable
+CREATE TABLE "DroppedLead" (
+    "id" TEXT NOT NULL,
+    "lead_id" TEXT,
+    "lead_email" TEXT,
+    "lead_name" TEXT,
+    "lead_phone" TEXT,
+    "lead_address" TEXT,
+    "lead_campaign" TEXT,
+    "lead_status" "LeadStatus",
+    "lead_sold_timestamp" TIMESTAMP(3),
+    "lead_sold_timestamp_txt" TEXT,
+    "lead_source" TEXT,
+    "lead_created_at" TIMESTAMP(3),
+    "lead_updated_at" TIMESTAMP(3),
+    "lead_meta_id" TEXT,
+    "lead_meta_ip_address" TEXT,
+    "lead_meta_browser_spec" TEXT,
+    "lead_meta_referer" TEXT,
+    "store_location_id" TEXT,
+    "store_location_store_idx" TEXT,
+    "store_location_store_name" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "formData" JSONB,
+    "marketingData" JSONB,
+    "apiData" JSONB,
+    "jsonData" JSONB,
+    "apiCallsHistory" JSONB[] DEFAULT ARRAY[]::JSONB[],
+
+    CONSTRAINT "DroppedLead_pkey" PRIMARY KEY ("id")
+);

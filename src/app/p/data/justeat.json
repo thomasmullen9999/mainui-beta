@@ -1,0 +1,415 @@
+[
+  {
+    "heading": "Have You Delivered For Just Eat In The Last 10 Weeks?",
+    "text": "Have You Delivered For Just Eat In The Last 10 Weeks?",
+    "descriptions": "Please note that you must have delivered directly for Just Eat using the Just Eat courier app and not only, for example, using the Stuart app.    ",
+    "fields": [
+      {
+        "label": "deliveredlast10weeks",
+        "type": "question",
+        "hint": "Have You Delivered For Just Eat In The Last 10 Weeks?",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Did You Sign Up To Work With Just Eat (Using The Just Eat Courier App) As A Self-Employed Independent Contractor Or Salaried Worker?",
+        "if_condition": "formData['deliveredlast10weeks'].value === 'Yes'"
+      },
+      {
+        "headingTo": "SorryPage1",
+        "if_condition": "formData['deliveredlast10weeks'].value === 'No'"
+      }
+    ]
+  },
+  {
+    "heading": "Did You Sign Up To Work With Just Eat (Using The Just Eat Courier App) As A Self-Employed Independent Contractor Or Salaried Worker?",
+    "text": "Did You Sign Up To Work With Just Eat (Using The Just Eat Courier App) As A Self-Employed Independent Contractor Or Salaried Worker?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "worktype",
+        "type": "question",
+        "hint": "Did You Sign Up To Work With Just Eat (Using The Just Eat Courier App) As A Self-Employed Independent Contractor Or Salaried Worker?        ",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Independent contractor", "Salaried worker"],
+        "allowedAnswer": ["Independent contractor", "Salaried worker"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "When Did You Last Deliver For Just Eat Using The Just Eat Courier App?",
+        "if_condition": "formData['worktype'].value === 'Independent contractor'"
+      },
+      {
+        "headingTo": "SorryPage2",
+        "if_condition": "formData['worktype'].value === 'Salaried worker'"
+      }
+    ]
+  },
+  {
+    "heading": "When Did You Last Deliver For Just Eat Using The Just Eat Courier App?",
+    "text": "When Did You Last Deliver For Just Eat Using The Just Eat Courier App?",
+    "descriptions": "To qualify, you must have delivered for Just Eat within the past 10 weeks.",
+    "fields": [
+      {
+        "label": "dateleft",
+        "hint": "Date Left",
+        "type": "Date",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Step Personal info",
+        "if_condition": "calculateDayDistances(formData['dateleft'].value) <= 70"
+      },
+      {
+        "headingTo": "SorryPage1",
+        "if_condition": "calculateDayDistances(formData['dateleft'].value) > 70"
+      }
+    ]
+  },
+  {
+    "heading": "Step Personal info",
+    "text": "What is your Name",
+    "descriptions": "Please provide your full name",
+    "fields": [
+      {
+        "label": "firstname",
+        "hint": "First Name",
+        "type": "text",
+        "condition": "formData['firstname'].value !== '' && /^[A-Za-z- ]+$/.test(formData['firstname'].value)",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      },
+      {
+        "label": "lastname",
+        "hint": "Last Name",
+        "type": "text",
+        "condition": "formData['lastname'].value !== '' && /^[A-Za-z- ]+$/.test(formData['lastname'].value)",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "What Is Your Date of Birth?",
+    "text": "What Is Your Date of Birth?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "dob",
+        "hint": "Date of Birth",
+        "type": "dob",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "address",
+        "if_condition": "calculateAge(formData['dob'].value) >= 18"
+      },
+      {
+        "headingTo": "SorryPage3",
+        "if_condition": "formData['dob'].value !== '' && calculateAge(formData['dob'].value) < 18"
+      }
+    ]
+  },
+
+  {
+    "heading": "address",
+    "text": "Address",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "address",
+        "hint": "Address",
+        "type": "address",
+        "condition": "formData['address'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Phone Number",
+    "text": "Phone Number",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "telphone",
+        "hint": "Phone",
+        "type": "phone",
+        "condition": "formData['telphone'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Step Email",
+    "text": "What is Your Email Address?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "email",
+        "hint": "Email",
+        "type": "email",
+        "condition": "formData['email'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Is This The Same Email Address As On Your Just Eat Courier Account?",
+    "text": "Is This The Same Email Address As On Your Just Eat Courier Account?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "sameemail",
+        "type": "question",
+        "hint": "Is This The Same Email Address As On Your Just Eat Courier Account?",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Future Marketing",
+        "if_condition": "formData['sameemail'].value === 'Yes'"
+      },
+      {
+        "headingTo": "Email address linked to your Just Eat courier account",
+        "if_condition": "formData['sameemail'].value === 'No'"
+      }
+    ]
+  },
+  {
+    "heading": "Email address linked to your Just Eat courier account",
+    "text": "Please Enter The Email address Linked to Your Just Eat Courier Account",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "email_justeat",
+        "hint": "Email",
+        "type": "email",
+        "condition": "formData['email_justeat'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+
+  {
+    "heading": "Future Marketing",
+    "text": "Future Marketing",
+    "descriptions": "{{document.URL.includes('maddisonclarke.co.uk') ? `I consent to Maddison Clarke sending future communications about any relevant services and products.` : `I consent to Fair Pay For All sending future communications about any relevant services and products.` }}",
+    "fields": [
+      {
+        "label": "futuremarketing",
+        "type": "question",
+        "hint": "Future Marketing",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "AcceptDBA",
+        "if_condition": "formData['futuremarketing'].value === 'Yes'"
+      },
+      {
+        "headingTo": "AcceptDBA",
+        "if_condition": "formData['futuremarketing'].value === 'No'"
+      }
+    ]
+  },
+
+  {
+    "heading": "Privacy Policy",
+    "text": "",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "privacypolicy",
+        "hint": "Privacy Policy",
+        "type": "question",
+        "question": "{{document.URL.includes('maddisonclarke.co.uk') ? `I understand that I am providing my contact details by way of email, phone and text in order for Maddison Clarke and Leigh Day to contact me about this claim and that details about how Maddison Clarke will further use my details can be found in the Privacy Policy.` : `I understand that I am providing my contact details by way of email, phone and text in order for Fair Pay for All and Leigh Day to contact me about this claim and that details about how Fair Pay for All will further use my details can be found in the Privacy Policy.`}}        ",
+        "options": ["Yes"],
+        "allowedAnswer": ["Yes"],
+        "selectsearch_options": [],
+        "agreements": {},
+        "condition": "true"
+      }
+    ]
+  },
+  {
+    "heading": "AcceptDBA",
+    "text": "",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "",
+        "type": "agreement",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {
+          "p1": {
+            "title": "Privacy Policy",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "{{document.URL.includes('maddisonclarke.co.uk') ? `I understand that I am providing my contact details by way of email, phone and text in order for Maddison Clarke and Leigh Day to contact me about this claim and that details about how Maddison Clarke will further use my details can be found in the [Privacy Policy](https://maddisonclarke.co.uk/privacy-policy/). \\n\\n ` : `I understand that I am providing my contact details by way of email, phone and text in order for Fair Pay for All and Leigh Day to contact me about this claim and that details about how Fair Pay for All will further use my details can be found in the [Privacy Policy](https://www.fairpayforall.co.uk/privacy-policy/).\\n\\n `}} "
+                  }
+                ]
+              }
+            ]
+          },
+          "p2": {
+            "title": "Final Step",
+            "author": "Accept Terms",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "{{ document.URL.includes('maddisonclarke.co.uk') ? `We understand that [the sign-up documents](https://maddisonclarke.co.uk/wp-content/uploads/2025/03/JUSTEAT_DBA.pdf) are lengthy and contain legal jargon, however it is required by law that they are provided to you.` : `We understand that [the sign-up documents](https://fairpayforall.co.uk/wp-content/uploads/2023/07/JUSTEAT_DBA.pdf) are lengthy and contain legal jargon, however it is required by law that they are provided to you.`}} \n\nBelow is a summary of the main points in those documents. Please note, reading this summary is not a substitute for reading the funding documents themselves."
+                  }
+                ]
+              }
+            ]
+          },
+          "p3": {
+            "title": "Read More in Final Step",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "### Legal funding \n\n- You are signing a “no-win, no-fee” agreement. If Leigh Day don’t win compensation for you, and you keep to the terms of the agreement, you won’t be charged a penny.\n\n- If you do win, Leigh Day will deduct 25% plus VAT from your compensation. For example, if you receive £10,000 in compensation, they will take 25% (£2,500) plus VAT (£500), so £3,000 in total.\n\n- No matter what, if the claim is successful, you will only pay Leigh Day 25% plus VAT of whatever compensation you receive. If the claim succeeds, they'll give you a full breakdown, so you’ll understand what they have charged.\n\n### CO-OPERATING WITH LEIGH DAY\n\n- It’s really important that you cooperate with Leigh Day. If you fail to cooperate with them, then they will no longer be able to act for you. They will do all that they can to make it as easy as possible for you to take part in the claim.\n\n- To be eligible to join the claim, you need to have worked at least one job directly for Just Eat using the Just Eat courier app (not, for example, using the Stuart app) in the last 10 weeks from today’s date. However, please feel free to register your interest if you have not worked in the last 10 weeks but think that you may work for Just Eat again in the future, as you may be able to join the claim at that stage.\n\n- Your claim will be brought in the Employment Tribunal, where the general rule is that each party covers their own costs, no matter who wins or loses. The Employment Tribunal does have the power to order that a party (for example, someone bringing a claim) pays costs if they have behaved badly, such as lying to the Employment Tribunal or not cooperating with the Employment Tribunal process. We do not think that there is a risk that an Employment Tribunal would order you to pay costs if you brought a claim, and we would let you know immediately if this changed.\n\n### CHANGING YOUR MIND\n\n- You have 14 days from sign up to change your mind about proceeding with the action and simply need to inform Leigh Day in writing that you no longer wish to proceed with the claim. Please note, reading this summary is not a substitute for reading the funding documents themselves.\n\n- I confirm that I wish to instruct Leigh Day to seek to recover compensation on my behalf in respect of my work for Just Eat and that I have read and understood the terms of the DBA and other attachments.\n\n"
+                  }
+                ]
+              }
+            ]
+          },
+          "p4": {
+            "title": "Thank you",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "## Thank you for completing the form to join the Just Eat Courier Claim, please keep an eye out for an email from us.\n\nIf you haven’t received a confirmation email within 48 hours, please contact Leigh Day's Just Eat Courier Claims team at justeat@leighday.co.uk."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "options": []
+      }
+    ],
+    "decisionType": "next"
+  },
+  {
+    "heading": "SorryPage1",
+    "text": "Sorry",
+    "descriptions": "You must have delivered for Just Eat within the past 10 weeks to be eligible for this claim.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-justeat` : `https://fairpayforall.co.uk/sorry-justeat` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorryPage2",
+    "text": "Sorry",
+    "descriptions": "Thank you for your interest in joining the Just Eat courier claim. Unfortunately, we are only bringing claims for couriers who have delivered as self-employed independent contractors. Therefore, we are unable to assist you further. If your position changes, please do come back to complete the form.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-justeat` : `https://fairpayforall.co.uk/sorry-justeat` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorryPage3",
+    "text": "Sorry",
+    "descriptions": "Unfortunately under 18’s have a different sign up process and you are unable to sign up on our website. Please contact Leigh Day to see if you can join.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-justeat` : `https://fairpayforall.co.uk/sorry-justeat` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  }
+]

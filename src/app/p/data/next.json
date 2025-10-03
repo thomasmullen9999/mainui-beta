@@ -1,0 +1,2599 @@
+[
+  {
+    "heading": "Are you still employed by Next?",
+    "text": "Are you still employed by Next?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "still_work_at_store",
+        "type": "question",
+        "hint": "Are you still employed by Next?",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "When did you start working for Next?",
+        "if_condition": "formData['still_work_at_store'].value === 'No'"
+      },
+      {
+        "headingTo": "When did you start working for Next?",
+        "if_condition": "formData['still_work_at_store'].value === 'Yes'"
+      }
+    ]
+  },
+  {
+    "heading": "When did you start working for Next?",
+    "text": "When did you start working for Next?",
+    "descriptions": "To join this claim you must have worked for Next.",
+    "fields": [
+      {
+        "label": "datestarted",
+        "hint": "Date Started",
+        "type": "Date",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Which Next store do you work at?",
+        "if_condition": "formData['datestarted'].value !== '' && formData['still_work_at_store'].value === 'Yes'"
+      },
+      {
+        "headingTo": "When did you leave?",
+        "if_condition": "formData['datestarted'].value !== '' && formData['still_work_at_store'].value === 'No'"
+      },
+      {
+        "headingTo": "SorryPage1",
+        "if_condition": "formData['datestarted'].value === ''"
+      }
+    ]
+  },
+  {
+    "heading": "When did you leave?",
+    "text": "When did you leave?",
+    "descriptions": "To make a valid claim you must have worked in a Next store in THE LAST 6 MONTHS.",
+    "fields": [
+      {
+        "label": "dateleft",
+        "hint": "Date Left",
+        "type": "Date",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Which Next store do you work at?",
+        "if_condition": "calculateDayDistances(formData['dateleft'].value) <= 161"
+      },
+      {
+        "headingTo": "SorryPage1",
+        "if_condition": "calculateDayDistances(formData['dateleft'].value) > 161"
+      }
+    ]
+  },
+  {
+    "heading": "Which Next store do you work at?",
+    "text": "{{ formData['still_work_at_store'].value ==`Yes`? `Which Next store do you work at?`:`Which Next store did you work at?` }}",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "storelocation",
+        "hint": "Store Location",
+        "type": "selectsearch",
+        "condition": "true",
+        "selectsearch_options": [
+          {
+            "value": "Aberdeen (Berryden)",
+            "label": "Aberdeen (Berryden)"
+          },
+          {
+            "value": "Aberdeen (Union Square)",
+            "label": "Aberdeen (Union Square)"
+          },
+          {
+            "value": "Aberyswyth",
+            "label": "Aberyswyth"
+          },
+          {
+            "value": "Altrincham (George Street)",
+            "label": "Altrincham (George Street)"
+          },
+          {
+            "value": "Andover",
+            "label": "Andover"
+          },
+          {
+            "value": "Antrim Clearance",
+            "label": "Antrim Clearance"
+          },
+          {
+            "value": "Arklow",
+            "label": "Arklow"
+          },
+          {
+            "value": "Ashford (County Square)",
+            "label": "Ashford (County Square)"
+          },
+          {
+            "value": "Ashton Under Lyne (Snipe Retail Park)",
+            "label": "Ashton Under Lyne (Snipe Retail Park)"
+          },
+          {
+            "value": "Aylesbury (Broadfields RP)",
+            "label": "Aylesbury (Broadfields RP)"
+          },
+          {
+            "value": "Aylesbury (Friars Square)",
+            "label": "Aylesbury (Friars Square)"
+          },
+          {
+            "value": "Ayr",
+            "label": "Ayr"
+          },
+          {
+            "value": "Ballymena (Fairhill Shopping Centre)",
+            "label": "Ballymena (Fairhill Shopping Centre)"
+          },
+          {
+            "value": "Banbridge",
+            "label": "Banbridge"
+          },
+          {
+            "value": "Banbury (Gateway)",
+            "label": "Banbury (Gateway)"
+          },
+          {
+            "value": "Bangor (Bloomfield) ",
+            "label": "Bangor (Bloomfield)"
+          },
+          {
+            "value": "Bangor (North Wales) (RP)",
+            "label": "Bangor (North Wales) (RP)"
+          },
+          {
+            "value": "Barnsley (Cortonwood)",
+            "label": "Barnsley (Cortonwood)"
+          },
+          {
+            "value": "Barnsley Glassworks",
+            "label": "Barnsley Glassworks"
+          },
+          {
+            "value": "Barnstaple (Anchorwood Retail Park)",
+            "label": "Barnstaple (Anchorwood Retail Park)"
+          },
+          {
+            "value": "Barnstaple (High Street)",
+            "label": "Barnstaple (High Street)"
+          },
+          {
+            "value": "Barrow in Furness (Hindpool Retail Park)",
+            "label": "Barrow in Furness (Hindpool Retail Park)"
+          },
+          {
+            "value": "Basildon Mayflower Retail Park",
+            "label": "Basildon Mayflower Retail Park"
+          },
+          {
+            "value": "Basingstoke",
+            "label": "Basingstoke"
+          },
+          {
+            "value": "Bath (Southgate Street)",
+            "label": "Bath (Southgate Street)"
+          },
+          {
+            "value": "Beckton (Gallions Reach)",
+            "label": "Beckton (Gallions Reach)"
+          },
+          {
+            "value": "Bedford (Interchange)",
+            "label": "Bedford (Interchange)"
+          },
+          {
+            "value": "Bedford (Midland Road)",
+            "label": "Bedford (Midland Road)"
+          },
+          {
+            "value": "Bentley Bridge",
+            "label": "Bentley Bridge"
+          },
+          {
+            "value": "Belfast",
+            "label": "Belfast"
+          },
+          {
+            "value": "Belfast (Boucher Road)",
+            "label": "Belfast (Boucher Road)"
+          },
+          {
+            "value": "Belfast (Donegall Place)",
+            "label": "Belfast (Donegall Place)"
+          },
+          {
+            "value": "Belfast (Forestside)",
+            "label": "Belfast (Forestside)"
+          },
+          {
+            "value": "Belfast (Holywood)",
+            "label": "Belfast (Holywood)"
+          },
+          {
+            "value": "Berwick Upon Tweed ",
+            "label": "Berwick Upon Tweed"
+          },
+          {
+            "value": "Bicester (Bicester Shopping Park)",
+            "label": "Bicester (Bicester Shopping Park)"
+          },
+          {
+            "value": "Bideford (Clearance)",
+            "label": "Bideford (Clearance)"
+          },
+          {
+            "value": "Biggleswade",
+            "label": "Biggleswade"
+          },
+          {
+            "value": "Birkenhead (Pyramids Shopping centre)",
+            "label": "Birkenhead (Pyramids Shopping centre)"
+          },
+          {
+            "value": "Birmingham (Bullring)",
+            "label": "Birmingham (Bullring)"
+          },
+          {
+            "value": "Birmingham (Heybarnes)",
+            "label": "Birmingham (Heybarnes)"
+          },
+          {
+            "value": "Birmingham (Junction 9)",
+            "label": "Birmingham (Junction 9)"
+          },
+          {
+            "value": "Birmingham (Nec Clearance)",
+            "label": "Birmingham (Nec Clearance)"
+          },
+          {
+            "value": "Birmingham (Selly Oak)",
+            "label": "Birmingham (Selly Oak)"
+          },
+          {
+            "value": "Birmingham (The Fort)",
+            "label": "Birmingham (The Fort)"
+          },
+          {
+            "value": "Birmingham Airport ",
+            "label": "Birmingham Airport"
+          },
+          {
+            "value": "Bishop Auckland",
+            "label": "Bishop Auckland"
+          },
+          {
+            "value": "Bishop Stortford",
+            "label": "Bishop Stortford"
+          },
+          {
+            "value": "Blackburn (The Mall)",
+            "label": "Blackburn (The Mall)"
+          },
+          {
+            "value": "Blackburn (Townsmoor)",
+            "label": "Blackburn (Townsmoor)"
+          },
+          {
+            "value": "Blackpool (Clifton)",
+            "label": "Blackpool (Clifton)"
+          },
+          {
+            "value": "Blackpool (Houndshill)",
+            "label": "Blackpool (Houndshill)"
+          },
+          {
+            "value": "Bluewater Park",
+            "label": "Bluewater Park"
+          },
+          {
+            "value": "Bognor Regis",
+            "label": "Bognor Regis"
+          },
+          {
+            "value": "Bolton (Middlebrook) ",
+            "label": "Bolton (Middlebrook)"
+          },
+          {
+            "value": "Bolton (The Marketplace)",
+            "label": "Bolton (The Marketplace)"
+          },
+          {
+            "value": "Bolton (Trinity)",
+            "label": "Bolton (Trinity)"
+          },
+          {
+            "value": "Bon Accord Centre - Aberdeen",
+            "label": "Bon Accord Centre - Aberdeen"
+          },
+          {
+            "value": "Bond Street",
+            "label": "Bond Street"
+          },
+          {
+            "value": "Boston (Wide Bargate)",
+            "label": "Boston (Wide Bargate)"
+          },
+          {
+            "value": "Bournemouth (Castlepoint)",
+            "label": "Bournemouth (Castlepoint)"
+          },
+          {
+            "value": "Bracknell - The Lexicon",
+            "label": "Bracknell - The Lexicon"
+          },
+          {
+            "value": "Bracknell Clearance",
+            "label": "Bracknell Clearance"
+          },
+          {
+            "value": "Bradford (Broadway)",
+            "label": "Bradford (Broadway)"
+          },
+          {
+            "value": "Bradford (Forster Square RP)",
+            "label": "Bradford (Forster Square RP)"
+          },
+          {
+            "value": "Bradford (Toftshaw Lane)",
+            "label": "Bradford (Toftshaw Lane)"
+          },
+          {
+            "value": "Braintree",
+            "label": "Braintree"
+          },
+          {
+            "value": "Bridgend Clearance",
+            "label": "Bridgend Clearance"
+          },
+          {
+            "value": "Bridgend Picton Court RP",
+            "label": "Bridgend Picton Court RP"
+          },
+          {
+            "value": "Bridgewater (RP)",
+            "label": "Bridgewater (RP)"
+          },
+          {
+            "value": "Brighton (Churchill Square)",
+            "label": "Brighton (Churchill Square)"
+          },
+          {
+            "value": "Brighton (Hollingbury RP)",
+            "label": "Brighton (Hollingbury RP)"
+          },
+          {
+            "value": "Bristol (Cabot Circus)",
+            "label": "Bristol (Cabot Circus)"
+          },
+          {
+            "value": "Bristol (Cribbs Causeway)",
+            "label": "Bristol (Cribbs Causeway)"
+          },
+          {
+            "value": "Bristol (Gallagher RP)",
+            "label": "Bristol (Gallagher RP)"
+          },
+          {
+            "value": "Bristol (Imperial RP)",
+            "label": "Bristol (Imperial RP)"
+          },
+          {
+            "value": "Bristol Clearance",
+            "label": "Bristol Clearance"
+          },
+          {
+            "value": "Bristol Cribbs Home and Garden",
+            "label": "Bristol Cribbs Home and Garden"
+          },
+          {
+            "value": "Bromborough (Croft RP)",
+            "label": "Bromborough (Croft RP)"
+          },
+          {
+            "value": "Bromley",
+            "label": "Bromley"
+          },
+          {
+            "value": "Burnley",
+            "label": "Burnley"
+          },
+          {
+            "value": "Burton on Trent",
+            "label": "Burton on Trent"
+          },
+          {
+            "value": "Bury (The Rock)",
+            "label": "Bury (The Rock)"
+          },
+          {
+            "value": "Bury (Woodfields)",
+            "label": "Bury (Woodfields)"
+          },
+          {
+            "value": "Bury St Edmunds",
+            "label": "Bury St Edmunds"
+          },
+          {
+            "value": "Buxton Spring Garden Centre",
+            "label": "Buxton Spring Garden Centre"
+          },
+          {
+            "value": "Caledonia Park Clearance",
+            "label": "Caledonia Park Clearance"
+          },
+          {
+            "value": "Camberley - Fashion Home and Garden",
+            "label": "Camberley - Fashion Home and Garden"
+          },
+          {
+            "value": "Camberley - Park Street",
+            "label": "Camberley - Park Street"
+          },
+          {
+            "value": "Cambridge (Bar Hill RP)",
+            "label": "Cambridge (Bar Hill RP)"
+          },
+          {
+            "value": "Cambridge (Beehive Home)",
+            "label": "Cambridge (Beehive Home)"
+          },
+          {
+            "value": "Cambridge (Grafton Centre)",
+            "label": "Cambridge (Grafton Centre)"
+          },
+          {
+            "value": "Cambridge (Sidney Street)",
+            "label": "Cambridge (Sidney Street)"
+          },
+          {
+            "value": "Canterbury - White Friar Centre",
+            "label": "Canterbury - White Friar Centre"
+          },
+          {
+            "value": "Cardiff Capital Retail Park",
+            "label": "Cardiff Capital Retail Park"
+          },
+          {
+            "value": "Cardiff Queen St",
+            "label": "Cardiff Queen St"
+          },
+          {
+            "value": "Carlisle - The Lanes",
+            "label": "Carlisle - The Lanes"
+          },
+          {
+            "value": "Carlisle (Home)",
+            "label": "Carlisle (Home)"
+          },
+          {
+            "value": "Carlow",
+            "label": "Carlow"
+          },
+          {
+            "value": "Carmarthen",
+            "label": "Carmarthen"
+          },
+          {
+            "value": "Carrickmines (Home)",
+            "label": "Carrickmines (Home)"
+          },
+          {
+            "value": "Castlebar",
+            "label": "Castlebar"
+          },
+          {
+            "value": "Castleford Clearance",
+            "label": "Castleford Clearance"
+          },
+          {
+            "value": "Catterick",
+            "label": "Catterick"
+          },
+          {
+            "value": "Charlton",
+            "label": "Charlton"
+          },
+          {
+            "value": "Chelmsford (Chelmer Village RP)",
+            "label": "Chelmsford (Chelmer Village RP)"
+          },
+          {
+            "value": "Chelmsford High Chelmer",
+            "label": "Chelmsford High Chelmer"
+          },
+          {
+            "value": "Cheltenham - Gallagher Retail Park",
+            "label": "Cheltenham - Gallagher Retail Park"
+          },
+          {
+            "value": "Cheltenham - High street",
+            "label": "Cheltenham - High street"
+          },
+          {
+            "value": "Cheshire Coliseum",
+            "label": "Cheshire Coliseum"
+          },
+          {
+            "value": "Cheshire Oaks - Clearance",
+            "label": "Cheshire Oaks - Clearance"
+          },
+          {
+            "value": "Cheshunt",
+            "label": "Cheshunt"
+          },
+          {
+            "value": "Chester - Eastgate Street",
+            "label": "Chester - Eastgate Street"
+          },
+          {
+            "value": "Chester (Broughton Park)",
+            "label": "Chester (Broughton Park)"
+          },
+          {
+            "value": "Chesterfield (Ravenside RP)",
+            "label": "Chesterfield (Ravenside RP)"
+          },
+          {
+            "value": "Chichester (Corn Exchange) - recently closed",
+            "label": "Chichester (Corn Exchange) - recently closed"
+          },
+          {
+            "value": "Chippenham",
+            "label": "Chippenham"
+          },
+          {
+            "value": "Clacton on Sea",
+            "label": "Clacton on Sea"
+          },
+          {
+            "value": "Coatbridge",
+            "label": "Coatbridge"
+          },
+          {
+            "value": "Colchester - High Street",
+            "label": "Colchester - High Street"
+          },
+          {
+            "value": "Colchester - Tollgate Centre",
+            "label": "Colchester - Tollgate Centre"
+          },
+          {
+            "value": "Coleraine",
+            "label": "Coleraine"
+          },
+          {
+            "value": "Colliers Wood",
+            "label": "Colliers Wood"
+          },
+          {
+            "value": "Colne",
+            "label": "Colne"
+          },
+          {
+            "value": "Cookstown",
+            "label": "Cookstown"
+          },
+          {
+            "value": "Corby (Phoenix RP)",
+            "label": "Corby (Phoenix RP)"
+          },
+          {
+            "value": "Cork (Blackpool Home)",
+            "label": "Cork (Blackpool Home)"
+          },
+          {
+            "value": "Cork (Douglas Court)",
+            "label": "Cork (Douglas Court)"
+          },
+          {
+            "value": "Cork (Mahon Point)",
+            "label": "Cork (Mahon Point)"
+          },
+          {
+            "value": "Cork (Opera Lane)",
+            "label": "Cork (Opera Lane)"
+          },
+          {
+            "value": "Coventry - Lower Precinct",
+            "label": "Coventry - Lower Precinct"
+          },
+          {
+            "value": "Coventry (Arena RP)",
+            "label": "Coventry (Arena RP)"
+          },
+          {
+            "value": "Coventry (Central Six RP)",
+            "label": "Coventry (Central Six RP)"
+          },
+          {
+            "value": "Coventry (Home only)",
+            "label": "Coventry (Home only)"
+          },
+          {
+            "value": "Craigavon",
+            "label": "Craigavon"
+          },
+          {
+            "value": "Cramlington",
+            "label": "Cramlington"
+          },
+          {
+            "value": "Crawley (County Mall)",
+            "label": "Crawley (County Mall)"
+          },
+          {
+            "value": "Crawley (County Oak)",
+            "label": "Crawley (County Oak)"
+          },
+          {
+            "value": "Crayford",
+            "label": "Crayford"
+          },
+          {
+            "value": "Crewe (RP)",
+            "label": "Crewe (RP)"
+          },
+          {
+            "value": "Croydon (Central Centre)",
+            "label": "Croydon (Central Centre)"
+          },
+          {
+            "value": "Croydon (Home Only)",
+            "label": "Croydon (Home Only)"
+          },
+          {
+            "value": "Croydon (Valley RP)",
+            "label": "Croydon (Valley RP)"
+          },
+          {
+            "value": "Croydon Clearance",
+            "label": "Croydon Clearance"
+          },
+          {
+            "value": "Cumbernauld Antonine Shopping Centre",
+            "label": "Cumbernauld Antonine Shopping Centre"
+          },
+          {
+            "value": "Cwmbran (RP)",
+            "label": "Cwmbran (RP)"
+          },
+          {
+            "value": "Dalton Park",
+            "label": "Dalton Park"
+          },
+          {
+            "value": "Darlington Clearance",
+            "label": "Darlington Clearance"
+          },
+          {
+            "value": "Darlington Cornmill",
+            "label": "Darlington Cornmill"
+          },
+          {
+            "value": "Denton - Crownpoint Shopping Park (Manchester)",
+            "label": "Denton - Crownpoint Shopping Park (Manchester)"
+          },
+          {
+            "value": "Derby (Intu)",
+            "label": "Derby (Intu)"
+          },
+          {
+            "value": "Derby (Kingsway RP)",
+            "label": "Derby (Kingsway RP)"
+          },
+          {
+            "value": "Derby (Wyvern Home)",
+            "label": "Derby (Wyvern Home)"
+          },
+          {
+            "value": "Didcot (Orchard St)",
+            "label": "Didcot (Orchard St)"
+          },
+          {
+            "value": "Doncaster (Frenchgate)",
+            "label": "Doncaster (Frenchgate)"
+          },
+          {
+            "value": "Doncaster (Lakeside Village Outlet)",
+            "label": "Doncaster (Lakeside Village Outlet)"
+          },
+          {
+            "value": "Doncaster (Wheatley)",
+            "label": "Doncaster (Wheatley)"
+          },
+          {
+            "value": "Douglas (Isle of Man)",
+            "label": "Douglas (Isle of Man)"
+          },
+          {
+            "value": "Dover - St James st",
+            "label": "Dover - St James st"
+          },
+          {
+            "value": "Drogheda",
+            "label": "Drogheda"
+          },
+          {
+            "value": "Dublin (Blackrock)",
+            "label": "Dublin (Blackrock)"
+          },
+          {
+            "value": "Dublin (Blanchardstown)",
+            "label": "Dublin (Blanchardstown)"
+          },
+          {
+            "value": "Dublin (Dundrum)",
+            "label": "Dublin (Dundrum)"
+          },
+          {
+            "value": "Dublin (Jervis Street)",
+            "label": "Dublin (Jervis Street)"
+          },
+          {
+            "value": "Dublin (Liffey Valley)",
+            "label": "Dublin (Liffey Valley)"
+          },
+          {
+            "value": "Dublin (Swords)",
+            "label": "Dublin (Swords)"
+          },
+          {
+            "value": "Dudley (Merry Hill)",
+            "label": "Dudley (Merry Hill)"
+          },
+          {
+            "value": "Dumfries",
+            "label": "Dumfries"
+          },
+          {
+            "value": "Dundee (Gallagher)",
+            "label": "Dundee (Gallagher)"
+          },
+          {
+            "value": "Dundee (Home Only)",
+            "label": "Dundee (Home Only)"
+          },
+          {
+            "value": "Dundee (Overgate)",
+            "label": "Dundee (Overgate)"
+          },
+          {
+            "value": "Dunfermline",
+            "label": "Dunfermline"
+          },
+          {
+            "value": "Dunstable (White Lion RP)",
+            "label": "Dunstable (White Lion RP)"
+          },
+          {
+            "value": "Durham (Arnison)",
+            "label": "Durham (Arnison)"
+          },
+          {
+            "value": "Durham (High st)",
+            "label": "Durham (High st)"
+          },
+          {
+            "value": "Ealing Broadway",
+            "label": "Ealing Broadway"
+          },
+          {
+            "value": "East Kilbride Clearance",
+            "label": "East Kilbride Clearance"
+          },
+          {
+            "value": "East Kilbride Kingsgate",
+            "label": "East Kilbride Kingsgate"
+          },
+          {
+            "value": "Eastbourne - The Beacon Centre",
+            "label": "Eastbourne - The Beacon Centre"
+          },
+          {
+            "value": "Eastbourne (Sovereign Harbour RP)",
+            "label": "Eastbourne (Sovereign Harbour RP)"
+          },
+          {
+            "value": "Edinburgh (Fort)",
+            "label": "Edinburgh (Fort)"
+          },
+          {
+            "value": "Edinburgh (Gyle)",
+            "label": "Edinburgh (Gyle)"
+          },
+          {
+            "value": "Edinburgh (Princes Street)",
+            "label": "Edinburgh (Princes Street)"
+          },
+          {
+            "value": "Edinburgh (Straiton)",
+            "label": "Edinburgh (Straiton)"
+          },
+          {
+            "value": "Edinburgh Airport",
+            "label": "Edinburgh Airport"
+          },
+          {
+            "value": "Elgin (Springfield)",
+            "label": "Elgin (Springfield)"
+          },
+          {
+            "value": "Eltham High Street",
+            "label": "Eltham High Street"
+          },
+          {
+            "value": "Enfield (Palace Exchange)",
+            "label": "Enfield (Palace Exchange)"
+          },
+          {
+            "value": "Enfield RP",
+            "label": "Enfield RP"
+          },
+          {
+            "value": "Enniskillen",
+            "label": "Enniskillen"
+          },
+          {
+            "value": "Epping High St",
+            "label": "Epping High St"
+          },
+          {
+            "value": "Epsom The Ashleigh Centre",
+            "label": "Epsom The Ashleigh Centre"
+          },
+          {
+            "value": "Evesham",
+            "label": "Evesham"
+          },
+          {
+            "value": "Exeter (Exebridge RP)",
+            "label": "Exeter (Exebridge RP)"
+          },
+          {
+            "value": "Exeter (Princess Hay)",
+            "label": "Exeter (Princess Hay)"
+          },
+          {
+            "value": "Falkirk (Central Retail Park)",
+            "label": "Falkirk (Central Retail Park)"
+          },
+          {
+            "value": "Falkirk (Home)",
+            "label": "Falkirk (Home)"
+          },
+          {
+            "value": "Fareham (Westbury)",
+            "label": "Fareham (Westbury)"
+          },
+          {
+            "value": "Farnborough Clearance",
+            "label": "Farnborough Clearance"
+          },
+          {
+            "value": "Feltham",
+            "label": "Feltham"
+          },
+          {
+            "value": "Fleetwood Clearance",
+            "label": "Fleetwood Clearance"
+          },
+          {
+            "value": "Fosse Park West",
+            "label": "Fosse Park West"
+          },
+          {
+            "value": "Fraddon",
+            "label": "Fraddon"
+          },
+          {
+            "value": "Gainsborough",
+            "label": "Gainsborough"
+          },
+          {
+            "value": "Galashiels",
+            "label": "Galashiels"
+          },
+          {
+            "value": "Galway",
+            "label": "Galway"
+          },
+          {
+            "value": "Galway (Gateway RP)",
+            "label": "Galway (Gateway RP)"
+          },
+          {
+            "value": "Gateshead (Beauty and Home - Metro Centre)",
+            "label": "Gateshead (Beauty and Home - Metro Centre)"
+          },
+          {
+            "value": "Gateshead (Home)",
+            "label": "Gateshead (Home)"
+          },
+          {
+            "value": "Gateshead (Metro Centre)",
+            "label": "Gateshead (Metro Centre)"
+          },
+          {
+            "value": "Glasgow (Argyle Street)",
+            "label": "Glasgow (Argyle Street)"
+          },
+          {
+            "value": "Glasgow (Bishopbriggs)",
+            "label": "Glasgow (Bishopbriggs)"
+          },
+          {
+            "value": "Glasgow (Braehead Home)",
+            "label": "Glasgow (Braehead Home)"
+          },
+          {
+            "value": "Glasgow (Braehead)",
+            "label": "Glasgow (Braehead)"
+          },
+          {
+            "value": "Glasgow (Buchanan Galleries)",
+            "label": "Glasgow (Buchanan Galleries)"
+          },
+          {
+            "value": "Glasgow (Silverburn Shopping Centre)",
+            "label": "Glasgow (Silverburn Shopping Centre)"
+          },
+          {
+            "value": "Glasgow (the Fort Shopping Centre)",
+            "label": "Glasgow (the Fort Shopping Centre)"
+          },
+          {
+            "value": "Glossop - Wrens Nest RP)",
+            "label": "Glossop - Wrens Nest RP)"
+          },
+          {
+            "value": "Gloucester (Peel Centre)",
+            "label": "Gloucester (Peel Centre)"
+          },
+          {
+            "value": "Grantham (Augustin RP)",
+            "label": "Grantham (Augustin RP)"
+          },
+          {
+            "value": "Great Yarmouth - (Gapton Hall RP)",
+            "label": "Great Yarmouth - (Gapton Hall RP)"
+          },
+          {
+            "value": "Grimsby (Freshney)",
+            "label": "Grimsby (Freshney)"
+          },
+          {
+            "value": "Grimsby (Victoria RP)",
+            "label": "Grimsby (Victoria RP)"
+          },
+          {
+            "value": "Guildford (Ladymead)",
+            "label": "Guildford (Ladymead)"
+          },
+          {
+            "value": "Guildford (The Friary)",
+            "label": "Guildford (The Friary)"
+          },
+          {
+            "value": "Halifax - Charlestown Road",
+            "label": "Halifax - Charlestown Road"
+          },
+          {
+            "value": "Hamilton",
+            "label": "Hamilton"
+          },
+          {
+            "value": "Handforth Dean",
+            "label": "Handforth Dean"
+          },
+          {
+            "value": "Hanley (Festival RP)",
+            "label": "Hanley (Festival RP)"
+          },
+          {
+            "value": "Haringey",
+            "label": "Haringey"
+          },
+          {
+            "value": "Harlow (Home)",
+            "label": "Harlow (Home)"
+          },
+          {
+            "value": "Harlow (Watergardens)",
+            "label": "Harlow (Watergardens)"
+          },
+          {
+            "value": "Harrogate",
+            "label": "Harrogate"
+          },
+          {
+            "value": "Harrow",
+            "label": "Harrow"
+          },
+          {
+            "value": "Hartlepool - Anchor RP)",
+            "label": "Hartlepool - Anchor RP)"
+          },
+          {
+            "value": "Hatfield",
+            "label": "Hatfield"
+          },
+          {
+            "value": "Havant",
+            "label": "Havant"
+          },
+          {
+            "value": "Haverford West - Withybush RP",
+            "label": "Haverford West - Withybush RP"
+          },
+          {
+            "value": "Hayes - Lombardy RP",
+            "label": "Hayes - Lombardy RP"
+          },
+          {
+            "value": "Hayle",
+            "label": "Hayle"
+          },
+          {
+            "value": "Haywards Heath - Orchard Shopping Centre",
+            "label": "Haywards Heath - Orchard Shopping Centre"
+          },
+          {
+            "value": "Hemel Hempstead - Riverside",
+            "label": "Hemel Hempstead - Riverside"
+          },
+          {
+            "value": "Hereford",
+            "label": "Hereford"
+          },
+          {
+            "value": "Hexham (Tynedale RP)",
+            "label": "Hexham (Tynedale RP)"
+          },
+          {
+            "value": "High Wycombe (Cress Road)",
+            "label": "High Wycombe (Cress Road)"
+          },
+          {
+            "value": "High Wycombe (Eden Centre)",
+            "label": "High Wycombe (Eden Centre)"
+          },
+          {
+            "value": "Hitchin",
+            "label": "Hitchin"
+          },
+          {
+            "value": "Horsham",
+            "label": "Horsham"
+          },
+          {
+            "value": "Hounslow (Treaty Centre)",
+            "label": "Hounslow (Treaty Centre)"
+          },
+          {
+            "value": "Huddersfield (Great Northern RP)",
+            "label": "Huddersfield (Great Northern RP)"
+          },
+          {
+            "value": "Huddersfield (Kingsgate Shopping Centre)",
+            "label": "Huddersfield (Kingsgate Shopping Centre)"
+          },
+          {
+            "value": "Hull (Anlaby RP)",
+            "label": "Hull (Anlaby RP)"
+          },
+          {
+            "value": "Hull (Kingswood)",
+            "label": "Hull (Kingswood)"
+          },
+          {
+            "value": "Hull (St Stephens SC)",
+            "label": "Hull (St Stephens SC)"
+          },
+          {
+            "value": "Hull Princes Key - Clearance",
+            "label": "Hull Princes Key - Clearance"
+          },
+          {
+            "value": "Huntingdon",
+            "label": "Huntingdon"
+          },
+          {
+            "value": "Ilford",
+            "label": "Ilford"
+          },
+          {
+            "value": "Inverness (Eastgate)",
+            "label": "Inverness (Eastgate)"
+          },
+          {
+            "value": "Inverness (RP)",
+            "label": "Inverness (RP)"
+          },
+          {
+            "value": "Ipswich (Martlesham Heath)",
+            "label": "Ipswich (Martlesham Heath)"
+          },
+          {
+            "value": "Ipswich (Suffolk RP)",
+            "label": "Ipswich (Suffolk RP)"
+          },
+          {
+            "value": "Keighley (Airedale Centre)",
+            "label": "Keighley (Airedale Centre)"
+          },
+          {
+            "value": "Kendal - Stricklandgate)",
+            "label": "Kendal - Stricklandgate)"
+          },
+          {
+            "value": "Kettering (RP)",
+            "label": "Kettering (RP)"
+          },
+          {
+            "value": "Kidderminster",
+            "label": "Kidderminster"
+          },
+          {
+            "value": "Kilkenny",
+            "label": "Kilkenny"
+          },
+          {
+            "value": "Kilmarnock (Home)",
+            "label": "Kilmarnock (Home)"
+          },
+          {
+            "value": "Kings Lynn",
+            "label": "Kings Lynn"
+          },
+          {
+            "value": "Kingston (Market Place)",
+            "label": "Kingston (Market Place)"
+          },
+          {
+            "value": "Kirkcaldy Fife RP",
+            "label": "Kirkcaldy Fife RP"
+          },
+          {
+            "value": "Knaresborough",
+            "label": "Knaresborough"
+          },
+          {
+            "value": "Lancaster (Perpignan Way)",
+            "label": "Lancaster (Perpignan Way)"
+          },
+          {
+            "value": "Leamington (Shires RP)",
+            "label": "Leamington (Shires RP)"
+          },
+          {
+            "value": "Leatherhead",
+            "label": "Leatherhead"
+          },
+          {
+            "value": "Leciester (Fosse Park)",
+            "label": "Leciester (Fosse Park)"
+          },
+          {
+            "value": "Leeds (Birstall)",
+            "label": "Leeds (Birstall)"
+          },
+          {
+            "value": "Leeds (Crown Point RP)",
+            "label": "Leeds (Crown Point RP)"
+          },
+          {
+            "value": "Leeds (Guiseley)",
+            "label": "Leeds (Guiseley)"
+          },
+          {
+            "value": "Leeds (Trinity)",
+            "label": "Leeds (Trinity)"
+          },
+          {
+            "value": "Leeds (White Rose)",
+            "label": "Leeds (White Rose)"
+          },
+          {
+            "value": "Leeds Thorpe Park",
+            "label": "Leeds Thorpe Park"
+          },
+          {
+            "value": "Leicester (High Cross)",
+            "label": "Leicester (High Cross)"
+          },
+          {
+            "value": "Leicester (Thurmaston RP)",
+            "label": "Leicester (Thurmaston RP)"
+          },
+          {
+            "value": "Leigh (Parsonage RP)",
+            "label": "Leigh (Parsonage RP)"
+          },
+          {
+            "value": "Letterkenny",
+            "label": "Letterkenny"
+          },
+          {
+            "value": "Lewisham Riverdale Centre",
+            "label": "Lewisham Riverdale Centre"
+          },
+          {
+            "value": "Limerick (Childers Road)",
+            "label": "Limerick (Childers Road)"
+          },
+          {
+            "value": "Lincoln (Valentine RP)",
+            "label": "Lincoln (Valentine RP)"
+          },
+          {
+            "value": "Lincoln (Waterside)",
+            "label": "Lincoln (Waterside)"
+          },
+          {
+            "value": "Lisburn",
+            "label": "Lisburn"
+          },
+          {
+            "value": "Lisburn Home",
+            "label": "Lisburn Home"
+          },
+          {
+            "value": "Lisburn (Sprucefield Home)",
+            "label": "Lisburn (Sprucefield Home)"
+          },
+          {
+            "value": "Lisburn (Sprucefield)",
+            "label": "Lisburn (Sprucefield)"
+          },
+          {
+            "value": "Liverpool - Church St",
+            "label": "Liverpool - Church St"
+          },
+          {
+            "value": "Liverpool - Edge Lane",
+            "label": "Liverpool - Edge Lane"
+          },
+          {
+            "value": "Liverpool - New Mersey RP",
+            "label": "Liverpool - New Mersey RP"
+          },
+          {
+            "value": "Liverpool (Clearance)",
+            "label": "Liverpool (Clearance)"
+          },
+          {
+            "value": "Liverpool Aintree",
+            "label": "Liverpool Aintree"
+          },
+          {
+            "value": "Livingston - Almond Vale",
+            "label": "Livingston - Almond Vale"
+          },
+          {
+            "value": "Livingston - Clearance",
+            "label": "Livingston - Clearance"
+          },
+          {
+            "value": "Llandudno - Conwy Road",
+            "label": "Llandudno - Conwy Road"
+          },
+          {
+            "value": "Llantrisant Talbot Green RP",
+            "label": "Llantrisant Talbot Green RP"
+          },
+          {
+            "value": "London Borehamwood",
+            "label": "London Borehamwood"
+          },
+          {
+            "value": "London Fenchurch Street (Plantation Place)",
+            "label": "London Fenchurch Street (Plantation Place)"
+          },
+          {
+            "value": "London Moorgate",
+            "label": "London Moorgate"
+          },
+          {
+            "value": "London Brent Cross (RP)",
+            "label": "London Brent Cross (RP)"
+          },
+          {
+            "value": "London Cheapside",
+            "label": "London Cheapside"
+          },
+          {
+            "value": "London Colney (RP)",
+            "label": "London Colney (RP)"
+          },
+          {
+            "value": "London East - Stratford Westfield",
+            "label": "London East - Stratford Westfield"
+          },
+          {
+            "value": "London Greenford",
+            "label": "London Greenford"
+          },
+          {
+            "value": "London Kew RP",
+            "label": "London Kew RP"
+          },
+          {
+            "value": "London Leyton Mills RP",
+            "label": "London Leyton Mills RP"
+          },
+          {
+            "value": "London Marble Arch",
+            "label": "London Marble Arch"
+          },
+          {
+            "value": "London Oxford St",
+            "label": "London Oxford St"
+          },
+          {
+            "value": "London Strand",
+            "label": "London Strand"
+          },
+          {
+            "value": "London Victoria Plaza",
+            "label": "London Victoria Plaza"
+          },
+          {
+            "value": "London Westfield",
+            "label": "London Westfield"
+          },
+          {
+            "value": "Londonderry (Foyleside)",
+            "label": "Londonderry (Foyleside)"
+          },
+          {
+            "value": "Londonderry (Home)",
+            "label": "Londonderry (Home)"
+          },
+          {
+            "value": "Londonderry (Lisnagelvin)",
+            "label": "Londonderry (Lisnagelvin)"
+          },
+          {
+            "value": "Loughborough (Rushes)",
+            "label": "Loughborough (Rushes)"
+          },
+          {
+            "value": "Loughton",
+            "label": "Loughton"
+          },
+          {
+            "value": "Lowestoff (North Quay RP)",
+            "label": "Lowestoff (North Quay RP)"
+          },
+          {
+            "value": "Luton (Airport)",
+            "label": "Luton (Airport)"
+          },
+          {
+            "value": "Luton (Arndale)",
+            "label": "Luton (Arndale)"
+          },
+          {
+            "value": "Luton (RP)",
+            "label": "Luton (RP)"
+          },
+          {
+            "value": "Macclesfield (Lyme Green RP)",
+            "label": "Macclesfield (Lyme Green RP)"
+          },
+          {
+            "value": "Maidstone (Dukes Walk)",
+            "label": "Maidstone (Dukes Walk)"
+          },
+          {
+            "value": "Maidstone (Eclipse Park)",
+            "label": "Maidstone (Eclipse Park)"
+          },
+          {
+            "value": "Malden - Blackwater RP",
+            "label": "Malden - Blackwater RP"
+          },
+          {
+            "value": "Malvern (RP)",
+            "label": "Malvern (RP)"
+          },
+          {
+            "value": "Managhan",
+            "label": "Managhan"
+          },
+          {
+            "value": "Manchester (Arndale)",
+            "label": "Manchester (Arndale)"
+          },
+          {
+            "value": "Manchester (Fort)",
+            "label": "Manchester (Fort)"
+          },
+          {
+            "value": "Manchester (Home Only - Barton Square)",
+            "label": "Manchester (Home Only - Barton Square)"
+          },
+          {
+            "value": "Manchester (Trafford Centre)",
+            "label": "Manchester (Trafford Centre)"
+          },
+          {
+            "value": "Manchester Airport",
+            "label": "Manchester Airport"
+          },
+          {
+            "value": "Mansfield (St Peters RP)",
+            "label": "Mansfield (St Peters RP)"
+          },
+          {
+            "value": "Mansfield Clearance",
+            "label": "Mansfield Clearance"
+          },
+          {
+            "value": "Maynooth",
+            "label": "Maynooth"
+          },
+          {
+            "value": "Merthyr Tydfil Cyfarthfa Retail Park",
+            "label": "Merthyr Tydfil Cyfarthfa Retail Park"
+          },
+          {
+            "value": "Middlesbrough - Linthorpe Road",
+            "label": "Middlesbrough - Linthorpe Road"
+          },
+          {
+            "value": "Middlesbrough (Cleveland RP)",
+            "label": "Middlesbrough (Cleveland RP)"
+          },
+          {
+            "value": "Milton Keynes - Silbury Arcade",
+            "label": "Milton Keynes - Silbury Arcade"
+          },
+          {
+            "value": "Milton Keynes - Stadium Way West",
+            "label": "Milton Keynes - Stadium Way West"
+          },
+          {
+            "value": "Milton Keynes (Home Only - Central RP)",
+            "label": "Milton Keynes (Home Only - Central RP)"
+          },
+          {
+            "value": "Milton Keynes (Kingston RP)",
+            "label": "Milton Keynes (Kingston RP)"
+          },
+          {
+            "value": "Milton Keynes Beauty and Home - Midsummer Boulevard",
+            "label": "Milton Keynes Beauty and Home - Midsummer Boulevard"
+          },
+          {
+            "value": "Morecambe - Central RP",
+            "label": "Morecambe - Central RP"
+          },
+          {
+            "value": "Morpeth",
+            "label": "Morpeth"
+          },
+          {
+            "value": "New Malden",
+            "label": "New Malden"
+          },
+          {
+            "value": "Newark (Northgate RP)",
+            "label": "Newark (Northgate RP)"
+          },
+          {
+            "value": "Newbury (Parkway)",
+            "label": "Newbury (Parkway)"
+          },
+          {
+            "value": "Newcastle (Eldon Square)",
+            "label": "Newcastle (Eldon Square)"
+          },
+          {
+            "value": "Newcastle (Kingston RP)",
+            "label": "Newcastle (Kingston RP)"
+          },
+          {
+            "value": "Newport (Friar Walk)",
+            "label": "Newport (Friar Walk)"
+          },
+          {
+            "value": "Newport (Isle of Wight)",
+            "label": "Newport (Isle of Wight)"
+          },
+          {
+            "value": "Newport (RP)",
+            "label": "Newport (RP)"
+          },
+          {
+            "value": "Newry",
+            "label": "Newry"
+          },
+          {
+            "value": "Newry (Home)",
+            "label": "Newry (Home)"
+          },
+          {
+            "value": "Newry (The Quays)",
+            "label": "Newry (The Quays)"
+          },
+          {
+            "value": "Newton Abbott",
+            "label": "Newton Abbott"
+          },
+          {
+            "value": "Newtonabbey",
+            "label": "Newtonabbey"
+          },
+          {
+            "value": "Newtownards Clearance",
+            "label": "Newtownards Clearance"
+          },
+          {
+            "value": "Norfolk - Longwater",
+            "label": "Norfolk - Longwater"
+          },
+          {
+            "value": "North Shields (Silverlink)",
+            "label": "North Shields (Silverlink)"
+          },
+          {
+            "value": "North Shields Clearance",
+            "label": "North Shields Clearance"
+          },
+          {
+            "value": "Northampton",
+            "label": "Northampton"
+          },
+          {
+            "value": "Northampton (Riverside RP)",
+            "label": "Northampton (Riverside RP)"
+          },
+          {
+            "value": "Northampton (Sixfields RP)",
+            "label": "Northampton (Sixfields RP)"
+          },
+          {
+            "value": "Northwich (RP)",
+            "label": "Northwich (RP)"
+          },
+          {
+            "value": "Norwich (Riverside RP)",
+            "label": "Norwich (Riverside RP)"
+          },
+          {
+            "value": "Norwich Hayhill",
+            "label": "Norwich Hayhill"
+          },
+          {
+            "value": "Nottingham (Giltbrook)",
+            "label": "Nottingham (Giltbrook)"
+          },
+          {
+            "value": "Nottingham (Riverside RP)",
+            "label": "Nottingham (Riverside RP)"
+          },
+          {
+            "value": "Nottingham (Victoria Centres)",
+            "label": "Nottingham (Victoria Centres)"
+          },
+          {
+            "value": "Nottingham (Victoria RP)",
+            "label": "Nottingham (Victoria RP)"
+          },
+          {
+            "value": "Nottingham Chilwell -Clearance",
+            "label": "Nottingham Chilwell -Clearance"
+          },
+          {
+            "value": "Nuneaton (Ropewalk)",
+            "label": "Nuneaton (Ropewalk)"
+          },
+          {
+            "value": "O2 Arena Clearance",
+            "label": "O2 Arena Clearance"
+          },
+          {
+            "value": "Oldbury (Green RP)",
+            "label": "Oldbury (Green RP)"
+          },
+          {
+            "value": "Oldham - Spindlers Shopping Centre",
+            "label": "Oldham - Spindlers Shopping Centre"
+          },
+          {
+            "value": "Oldham (Central RP)",
+            "label": "Oldham (Central RP)"
+          },
+          {
+            "value": "Omagh",
+            "label": "Omagh"
+          },
+          {
+            "value": "Orpington (Nugent RP)",
+            "label": "Orpington (Nugent RP)"
+          },
+          {
+            "value": "Oxford (Cowley RP)",
+            "label": "Oxford (Cowley RP)"
+          },
+          {
+            "value": "Oxford (Westgate)",
+            "label": "Oxford (Westgate)"
+          },
+          {
+            "value": "Perth High Street",
+            "label": "Perth High Street"
+          },
+          {
+            "value": "Peterborough (Brotherhood RP)",
+            "label": "Peterborough (Brotherhood RP)"
+          },
+          {
+            "value": "Peterborough (Serpentine RP)",
+            "label": "Peterborough (Serpentine RP)"
+          },
+          {
+            "value": "Plymouth (Drake Circus)",
+            "label": "Plymouth (Drake Circus)"
+          },
+          {
+            "value": "Plymouth (Marsh Mills)",
+            "label": "Plymouth (Marsh Mills)"
+          },
+          {
+            "value": "Poole - Dolphin Centre",
+            "label": "Poole - Dolphin Centre"
+          },
+          {
+            "value": "Poole (Home Only)",
+            "label": "Poole (Home Only)"
+          },
+          {
+            "value": "Poole (Wessex Gate)",
+            "label": "Poole (Wessex Gate)"
+          },
+          {
+            "value": "Port Glasgow (Gallagher Shopping Park)",
+            "label": "Port Glasgow (Gallagher Shopping Park)"
+          },
+          {
+            "value": "Portsmouth (Cascades)",
+            "label": "Portsmouth (Cascades)"
+          },
+          {
+            "value": "Prescot - Cables Park",
+            "label": "Prescot - Cables Park"
+          },
+          {
+            "value": "Prestatyn - Nant Hall Road",
+            "label": "Prestatyn - Nant Hall Road"
+          },
+          {
+            "value": "Preston (Capitol)",
+            "label": "Preston (Capitol)"
+          },
+          {
+            "value": "Preston (Deepdale)",
+            "label": "Preston (Deepdale)"
+          },
+          {
+            "value": "Preston (Fishergate)",
+            "label": "Preston (Fishergate)"
+          },
+          {
+            "value": "Quayside Mediacity Outlet (Salford)",
+            "label": "Quayside Mediacity Outlet (Salford)"
+          },
+          {
+            "value": "Reading (Calcot RP)",
+            "label": "Reading (Calcot RP)"
+          },
+          {
+            "value": "Reading (Oracle)",
+            "label": "Reading (Oracle)"
+          },
+          {
+            "value": "Reading (Oracle) Beauty and Home",
+            "label": "Reading (Oracle) Beauty and Home"
+          },
+          {
+            "value": "Redditch",
+            "label": "Redditch"
+          },
+          {
+            "value": "Rochdale Riverside",
+            "label": "Rochdale Riverside"
+          },
+          {
+            "value": "Romford (Gallows Corner RP)",
+            "label": "Romford (Gallows Corner RP)"
+          },
+          {
+            "value": "Romford (Liberty Shopping Centre)",
+            "label": "Romford (Liberty Shopping Centre)"
+          },
+          {
+            "value": "Rotherham",
+            "label": "Rotherham"
+          },
+          {
+            "value": "Rugby",
+            "label": "Rugby"
+          },
+          {
+            "value": "Rushden",
+            "label": "Rushden"
+          },
+          {
+            "value": "Rustington",
+            "label": "Rustington"
+          },
+          {
+            "value": "Salisbury (Southampton Road RP)",
+            "label": "Salisbury (Southampton Road RP)"
+          },
+          {
+            "value": "Scarborough (Brunswick Shopping Centre)",
+            "label": "Scarborough (Brunswick Shopping Centre)"
+          },
+          {
+            "value": "Scarborough (Home Only)",
+            "label": "Scarborough (Home Only)"
+          },
+          {
+            "value": "Scunthorpe (Gallagher RP)",
+            "label": "Scunthorpe (Gallagher RP)"
+          },
+          {
+            "value": "Sheffield (Crystal SC)",
+            "label": "Sheffield (Crystal SC)"
+          },
+          {
+            "value": "Sheffield (Meadowhall Home)",
+            "label": "Sheffield (Meadowhall Home)"
+          },
+          {
+            "value": "Sheffield (Meadowhall)",
+            "label": "Sheffield (Meadowhall)"
+          },
+          {
+            "value": "Sheffield (Norton)",
+            "label": "Sheffield (Norton)"
+          },
+          {
+            "value": "Sheffield (The Moor)",
+            "label": "Sheffield (The Moor)"
+          },
+          {
+            "value": "Shoreham",
+            "label": "Shoreham"
+          },
+          {
+            "value": "Shrewsbury (Meole Brace RP)",
+            "label": "Shrewsbury (Meole Brace RP)"
+          },
+          {
+            "value": "Skipton",
+            "label": "Skipton"
+          },
+          {
+            "value": "Sligo",
+            "label": "Sligo"
+          },
+          {
+            "value": "Slough (Bath Road RP)",
+            "label": "Slough (Bath Road RP)"
+          },
+          {
+            "value": "Solihull",
+            "label": "Solihull"
+          },
+          {
+            "value": "Solihull (Touchwood)",
+            "label": "Solihull (Touchwood)"
+          },
+          {
+            "value": "Somerset Street Clearance (Somerset)",
+            "label": "Somerset Street Clearance (Somerset)"
+          },
+          {
+            "value": "South Shields",
+            "label": "South Shields"
+          },
+          {
+            "value": "Southampton (Hedge End)",
+            "label": "Southampton (Hedge End)"
+          },
+          {
+            "value": "Southampton (Home)",
+            "label": "Southampton (Home)"
+          },
+          {
+            "value": "Southampton West Quay",
+            "label": "Southampton West Quay"
+          },
+          {
+            "value": "Southend",
+            "label": "Southend"
+          },
+          {
+            "value": "Southport (Central RP)",
+            "label": "Southport (Central RP)"
+          },
+          {
+            "value": "Southport (Lord st)",
+            "label": "Southport (Lord st)"
+          },
+          {
+            "value": "Spalding Clearance",
+            "label": "Spalding Clearance"
+          },
+          {
+            "value": "St Helens",
+            "label": "St Helens"
+          },
+          {
+            "value": "St Helier (Jersey)",
+            "label": "St Helier (Jersey)"
+          },
+          {
+            "value": "St Helier (Jersey)",
+            "label": "St Helier (Jersey)"
+          },
+          {
+            "value": "St Peter Port (Guernsey)",
+            "label": "St Peter Port (Guernsey)"
+          },
+          {
+            "value": "Stafford",
+            "label": "Stafford"
+          },
+          {
+            "value": "Staines (Two Rivers RP)",
+            "label": "Staines (Two Rivers RP)"
+          },
+          {
+            "value": "Sterling Mills Outlet Store (Devon Vale)",
+            "label": "Sterling Mills Outlet Store (Devon Vale)"
+          },
+          {
+            "value": "Stevenage (Forum)",
+            "label": "Stevenage (Forum)"
+          },
+          {
+            "value": "Stirling  (The Thistles Shopping Centre)",
+            "label": "Stirling  (The Thistles Shopping Centre)"
+          },
+          {
+            "value": "Stockport (Peel)",
+            "label": "Stockport (Peel)"
+          },
+          {
+            "value": "Stockton (Teaside)",
+            "label": "Stockton (Teaside)"
+          },
+          {
+            "value": "Stoke - Longton",
+            "label": "Stoke - Longton"
+          },
+          {
+            "value": "Stoke Clearance - Talke RP",
+            "label": "Stoke Clearance - Talke RP"
+          },
+          {
+            "value": "Stoke-on-Trent (The Potteries Shopping Centre)",
+            "label": "Stoke-on-Trent (The Potteries Shopping Centre)"
+          },
+          {
+            "value": "Stratford (Maybird RP)",
+            "label": "Stratford (Maybird RP)"
+          },
+          {
+            "value": "Strood (RP)",
+            "label": "Strood (RP)"
+          },
+          {
+            "value": "Sunderland",
+            "label": "Sunderland"
+          },
+          {
+            "value": "Surrey Quays RP",
+            "label": "Surrey Quays RP"
+          },
+          {
+            "value": "Sutton (St Nicholas)",
+            "label": "Sutton (St Nicholas)"
+          },
+          {
+            "value": "Sutton Coldfield",
+            "label": "Sutton Coldfield"
+          },
+          {
+            "value": "Swansea Morfa",
+            "label": "Swansea Morfa"
+          },
+          {
+            "value": "Swansea Oxford Street",
+            "label": "Swansea Oxford Street"
+          },
+          {
+            "value": "Swindon (Greenbridge RP)",
+            "label": "Swindon (Greenbridge RP)"
+          },
+          {
+            "value": "Swindon (Orbital RP)",
+            "label": "Swindon (Orbital RP)"
+          },
+          {
+            "value": "Swindon (Regent St)",
+            "label": "Swindon (Regent St)"
+          },
+          {
+            "value": "Swindon Clearance",
+            "label": "Swindon Clearance"
+          },
+          {
+            "value": "Swindon Home Only",
+            "label": "Swindon Home Only"
+          },
+          {
+            "value": "Sydenham",
+            "label": "Sydenham"
+          },
+          {
+            "value": "Tamworth (RP)",
+            "label": "Tamworth (RP)"
+          },
+          {
+            "value": "Taunton",
+            "label": "Taunton"
+          },
+          {
+            "value": "Telford (Forge RP)",
+            "label": "Telford (Forge RP)"
+          },
+          {
+            "value": "Telford Shopping Centre",
+            "label": "Telford Shopping Centre"
+          },
+          {
+            "value": "Thanet",
+            "label": "Thanet"
+          },
+          {
+            "value": "Thurrock (Lakeside Home Only)",
+            "label": "Thurrock (Lakeside Home Only)"
+          },
+          {
+            "value": "Thurrock (Lakeskide)",
+            "label": "Thurrock (Lakeskide)"
+          },
+          {
+            "value": "Torquay (Wren RP)",
+            "label": "Torquay (Wren RP)"
+          },
+          {
+            "value": "Tottenham Hale",
+            "label": "Tottenham Hale"
+          },
+          {
+            "value": "Tralee",
+            "label": "Tralee"
+          },
+          {
+            "value": "Trowbridge (Gateway RP)",
+            "label": "Trowbridge (Gateway RP)"
+          },
+          {
+            "value": "Truro",
+            "label": "Truro"
+          },
+          {
+            "value": "Tunbridge Wells (Camden Road)",
+            "label": "Tunbridge Wells (Camden Road)"
+          },
+          {
+            "value": "Tunbridge Wells Shopping Centre",
+            "label": "Tunbridge Wells Shopping Centre"
+          },
+          {
+            "value": "Uxbridge",
+            "label": "Uxbridge"
+          },
+          {
+            "value": "Wakefield (Trinity)",
+            "label": "Wakefield (Trinity)"
+          },
+          {
+            "value": "Walton on Thames",
+            "label": "Walton on Thames"
+          },
+          {
+            "value": "Wandsworth",
+            "label": "Wandsworth"
+          },
+          {
+            "value": "Warrington (Gemini RP)",
+            "label": "Warrington (Gemini RP)"
+          },
+          {
+            "value": "Warrington (Golden Square)",
+            "label": "Warrington (Golden Square)"
+          },
+          {
+            "value": "Warrington Clearance",
+            "label": "Warrington Clearance"
+          },
+          {
+            "value": "Washington Galleries",
+            "label": "Washington Galleries"
+          },
+          {
+            "value": "Waterford (Ardkeen)",
+            "label": "Waterford (Ardkeen)"
+          },
+          {
+            "value": "Watford Harlequin",
+            "label": "Watford Harlequin"
+          },
+          {
+            "value": "Watford Intu",
+            "label": "Watford Intu"
+          },
+          {
+            "value": "Watford Waterfields",
+            "label": "Watford Waterfields"
+          },
+          {
+            "value": "Wednesfield",
+            "label": "Wednesfield"
+          },
+          {
+            "value": "Welwyn Garden City",
+            "label": "Welwyn Garden City"
+          },
+          {
+            "value": "Wembley",
+            "label": "Wembley"
+          },
+          {
+            "value": "West Bromwich",
+            "label": "West Bromwich"
+          },
+          {
+            "value": "Weston Super Mare",
+            "label": "Weston Super Mare"
+          },
+          {
+            "value": "Whiteley Village",
+            "label": "Whiteley Village"
+          },
+          {
+            "value": "Widnes",
+            "label": "Widnes"
+          },
+          {
+            "value": "Wigan (Grand Arcade)",
+            "label": "Wigan (Grand Arcade)"
+          },
+          {
+            "value": "Wigan (Robin RP)",
+            "label": "Wigan (Robin RP)"
+          },
+          {
+            "value": "Witney (Woolgate)",
+            "label": "Witney (Woolgate)"
+          },
+          {
+            "value": "Woking",
+            "label": "Woking"
+          },
+          {
+            "value": "Wolverhampton (Dudley St)",
+            "label": "Wolverhampton (Dudley St)"
+          },
+          {
+            "value": "Wolverhampton (St John's RP)",
+            "label": "Wolverhampton (St John's RP)"
+          },
+          {
+            "value": "Worcester (Cathedral Plaza)",
+            "label": "Worcester (Cathedral Plaza)"
+          },
+          {
+            "value": "Worcester (Elgar RP)",
+            "label": "Worcester (Elgar RP)"
+          },
+          {
+            "value": "Workington",
+            "label": "Workington"
+          },
+          {
+            "value": "Wrexham (Eagles Meadow)",
+            "label": "Wrexham (Eagles Meadow)"
+          },
+          {
+            "value": "Yate",
+            "label": "Yate"
+          },
+          {
+            "value": "Yeovil (Peel Centre)",
+            "label": "Yeovil (Peel Centre)"
+          },
+          {
+            "value": "York (Coney St)",
+            "label": "York (Coney St)"
+          },
+          {
+            "value": "York (Vangarde RP)",
+            "label": "York (Vangarde RP)"
+          }
+        ],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Were you on an hourly rate?",
+        "if_condition": "![\"Bond Street\", \"London Fenchurch Street (Plantation Place)\", \"London Moorgate\", \"London Cheapside\", \"London East - Stratford Westfield\", \"London Greenford\", \"London Marble Arch\", \"London Oxford St\", \"London Strand\", \"London Victoria Plaza\", \"London Westfield\", \"Antrim Clearance\", \"Arklow\", \"Ballymena (Fairhill Shopping Centre)\", \"Banbridge\", \"Bangor (Bloomfield)\", \"Belfast\", \"Belfast (Boucher Road)\", \"Belfast (Donegall Place)\", \"Belfast (Forestside)\", \"Belfast (Holywood)\", \"Carlow\", \"Carrickmines (Home)\", \"Castlebar\", \"Coleraine\", \"Cookstown\", \"Cork (Blackpool Home)\", \"Cork (Douglas Court)\", \"Cork (Mahon Point)\", \"Cork (Opera Lane)\", \"Craigavon\", \"Drogheda\", \"Dublin (Blackrock)\", \"Dublin (Blanchardstown)\", \"Dublin (Dundrum)\", \"Dublin (Jervis Street)\", \"Dublin (Liffey Valley)\", \"Dublin (Swords)\", \"Enniskillen\", \"Galway\", \"Kilkenny\", \"Letterkenny\", \"Limerick (Childers Road)\", \"Lisburn\", \"Lisburn Home\", \"Lisburn (Sprucefield Home)\", \"Lisburn (Sprucefield)\", \"Londonderry (Foyleside)\", \"Londonderry (Home)\", \"Londonderry (Lisnagelvin)\", \"Managhan\", \"Maynooth\", \"Newry\", \"Newry (Home)\", \"Newry (The Quays)\", \"Newtonabbey\", \"Newtownards Clearance\", \"Omagh\", \"Sligo\", \"St Helier (Jersey)\", \"St Peter Port (Guernsey)\", \"Tralee\", \"Waterford (Ardkeen)\"].includes(formData['storelocation'].value) && formData['storelocation'].value !== ''"
+      },
+      {
+        "headingTo": "SorryPage1",
+        "if_condition": "[\"Bond Street\", \"London Fenchurch Street (Plantation Place)\", \"London Moorgate\", \"London Cheapside\", \"London East - Stratford Westfield\", \"London Greenford\", \"London Marble Arch\", \"London Oxford St\", \"London Strand\", \"London Victoria Plaza\", \"London Westfield\",\"Antrim Clearance\", \"Arklow\", \"Ballymena (Fairhill Shopping Centre)\", \"Banbridge\", \"Bangor (Bloomfield)\", \"Belfast\", \"Belfast (Boucher Road)\", \"Belfast (Donegall Place)\", \"Belfast (Forestside)\", \"Belfast (Holywood)\", \"Carlow\", \"Carrickmines (Home)\", \"Castlebar\", \"Coleraine\", \"Cookstown\", \"Cork (Blackpool Home)\", \"Cork (Douglas Court)\", \"Cork (Mahon Point)\", \"Cork (Opera Lane)\", \"Craigavon\", \"Drogheda\", \"Dublin (Blackrock)\", \"Dublin (Blanchardstown)\", \"Dublin (Dundrum)\", \"Dublin (Jervis Street)\", \"Dublin (Liffey Valley)\", \"Dublin (Swords)\", \"Enniskillen\", \"Galway\", \"Kilkenny\", \"Letterkenny\", \"Limerick (Childers Road)\", \"Lisburn\", \"Lisburn Home\", \"Lisburn (Sprucefield Home)\", \"Lisburn (Sprucefield)\", \"Londonderry (Foyleside)\", \"Londonderry (Home)\", \"Londonderry (Lisnagelvin)\", \"Managhan\", \"Maynooth\", \"Newry\", \"Newry (Home)\", \"Newry (The Quays)\", \"Newtonabbey\", \"Newtownards Clearance\", \"Omagh\", \"Sligo\", \"St Helier (Jersey)\", \"St Peter Port (Guernsey)\", \"Tralee\", \"Waterford (Ardkeen)\"].includes(formData['storelocation'].value) && formData['storelocation'].value !== ''"
+      }
+    ]
+  },
+  {
+    "heading": "Were you on an hourly rate?",
+    "text": "{{ formData['still_work_at_store'].value ==`Yes`? `Are you on an hourly rate?`:`Were you on an hourly rate?` }}",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "hourly_rate",
+        "type": "question",
+        "hint": "Were you on an hourly rate?",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "What was your job title?",
+        "if_condition": "formData['hourly_rate'].value === 'Yes'"
+      },
+      {
+        "headingTo": "SorryPage1",
+        "if_condition": "formData['hourly_rate'].value === 'No'"
+      }
+    ]
+  },
+  {
+    "heading": "What was your job title?",
+    "text": "{{ formData['still_work_at_store'].value ==`Yes`? `What is your job title?`:`What was your job title?` }}",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "job_title",
+        "type": "question",
+        "hint": "Job Title",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": [
+          "Sales Consultant",
+          "Stockroom Assistant",
+          "Team Coach",
+          "Other"
+        ],
+        "allowedAnswer": [
+          "Sales Consultant",
+          "Stockroom Assistant",
+          "Team Coach",
+          "Other"
+        ],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Step Personal info",
+        "if_condition": "formData['job_title'].value !== 'Other'"
+      },
+      {
+        "headingTo": "SorryPage1",
+        "if_condition": "formData['job_title'].value === 'Other'"
+      }
+    ]
+  },
+  {
+    "heading": "Step Personal info",
+    "text": "What is your Name",
+    "descriptions": "Please provide your full name",
+    "fields": [
+      {
+        "label": "firstname",
+        "hint": "First Name",
+        "type": "text",
+        "condition": "formData['firstname'].value !== '' && /^[A-Za-z- ]+$/.test(formData['firstname'].value)",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      },
+      {
+        "label": "lastname",
+        "hint": "Last Name",
+        "type": "text",
+        "condition": "formData['lastname'].value !== '' && /^[A-Za-z- ]+$/.test(formData['lastname'].value)",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "What Is Your Date of Birth?",
+    "text": "What Is Your Date of Birth?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "dob",
+        "hint": "Date of Birth",
+        "type": "dob",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Gender",
+        "if_condition": "calculateAge(formData['dob'].value) >= 18"
+      },
+      {
+        "headingTo": "SorrypageUnder18",
+        "if_condition": "formData['dob'].value !== '' && calculateAge(formData['dob'].value) < 18"
+      }
+    ]
+  },
+  {
+    "heading": "Gender",
+    "text": "Gender",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "gender",
+        "type": "question",
+        "hint": "Gender",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Male", "Female"],
+        "allowedAnswer": ["Male", "Female"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "address",
+        "if_condition": "formData['gender'].value !== ''"
+      }
+    ]
+  },
+  {
+    "heading": "address",
+    "text": "Address",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "address",
+        "hint": "Address",
+        "type": "address",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Phone Number",
+        "if_condition": "formData['address'].value !== '' && !formData['postcode'].value.toUpperCase().startsWith('BT')"
+      },
+      {
+        "headingTo": "SorryPageBelfast",
+        "if_condition": "formData['postcode'].value.toUpperCase().startsWith('BT')"
+      }
+    ]
+  },
+  {
+    "heading": "Phone Number",
+    "text": "Phone Number",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "telphone",
+        "hint": "Phone",
+        "type": "phone",
+        "condition": "formData['telphone'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Step Email",
+    "text": "What is Your Email Address?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "email",
+        "hint": "Email",
+        "type": "email",
+        "condition": "formData['email'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Step Staff Number",
+    "text": "Please Enter Your Employee or National Insurance Number to Continue",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "ni_number",
+        "hint": "NI Number",
+        "type": "text",
+        "condition": "formData['employee_number'].value !== '' || formData['ni_number'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      },
+      {
+        "label": "employee_number",
+        "hint": "Employee Number",
+        "type": "text",
+        "condition": "formData['employee_number'].value !== '' || formData['ni_number'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Future Marketing",
+    "text": "Future Marketing",
+    "descriptions": "{{document.URL.includes('maddisonclarke.co.uk') ? `I consent to Maddison Clarke sending future communications about any relevant services and products.` : `I consent to Fair Pay For All sending future communications about any relevant services and products.` }}",
+    "fields": [
+      {
+        "label": "futuremarketing",
+        "type": "question",
+        "hint": "Future Marketing",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "AcceptDBA",
+        "if_condition": "formData['futuremarketing'].value === 'Yes'"
+      },
+      {
+        "headingTo": "AcceptDBA",
+        "if_condition": "formData['futuremarketing'].value === 'No'"
+      }
+    ]
+  },
+  {
+    "heading": "Privacy Policy",
+    "text": "",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "privacypolicy",
+        "hint": "Privacy Policy",
+        "type": "question",
+        "question": "{{document.URL.includes('maddisonclarke.co.uk') ? `I understand that I am providing my contact details by way of email, phone and text in order for Maddison Clarke and Leigh Day to contact me about this claim and that details about how Maddison Clarke will further use my details can be found in the Privacy Policy.` : `I understand that I am providing my contact details by way of email, phone and text in order for Fair Pay for All and Leigh Day to contact me about this claim and that details about how Fair Pay for All will further use my details can be found in the Privacy Policy.`}}        ",
+        "options": ["Yes"],
+        "allowedAnswer": ["Yes"],
+        "selectsearch_options": [],
+        "agreements": {},
+        "condition": "true"
+      }
+    ]
+  },
+  {
+    "heading": "AcceptDBA",
+    "text": "",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "",
+        "type": "agreement",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {
+          "p1": {
+            "title": "Privacy Policy",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "{{document.URL.includes('maddisonclarke.co.uk') ? `I understand that I am providing my contact details by way of email, phone and text in order for Maddison Clarke and Leigh Day to contact me about this claim and that details about how Maddison Clarke will further use my details can be found in the [Privacy Policy](https://maddisonclarke.co.uk/privacy-policy/). \\n\\n ` : `I understand that I am providing my contact details by way of email, phone and text in order for Fair Pay for All and Leigh Day to contact me about this claim and that details about how Fair Pay for All will further use my details can be found in the [Privacy Policy](https://www.fairpayforall.co.uk/privacy-policy/).\\n\\n `}} "
+                  }
+                ]
+              }
+            ]
+          },
+          "p2": {
+            "title": "Final Step",
+            "author": "I Accept",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "TO COMPLETE YOUR REGISTRATION YOU MUST AGREE TO LEIGH DAY'S PAPERWORK. YOU CAN DO THIS BY PRESSING 'I ACCEPT' AT THE BOTTOM OF THE PAGE.\n\nIf all of your information is correct, Leigh Day solicitors are willing to represent you in your equal pay claim against Next on a no win no fee basis, subject to regulatory checks.\n\nIf you want Leigh Day to bring a claim for you then you need to click the accept button at the bottom of this page. This confirms you have read and agree to the client care and costs letter, form of authority and the Damages-Based Agreement (‘DBA’) below. You also agree that this agreement is of your own free will.\n\n"
+                  }
+                ]
+              }
+            ]
+          },
+          "p3": {
+            "title": "Read More in Final Step",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "Leigh Day can terminate the DBA at any time at no cost to you. You have the right to cancel your agreement within 14 days, but after this point if you terminate the DBA before the end of the claim or act unreasonably (please see sections 7 and 10 of the DBA), you may be required to pay Leigh Day your share of costs as they are at that time.\n\nFor a summary of the main points please read the information in the grey text box below. The full terms of the client care and costs letter and DBA are linked below.\n\nThe button to agree to these documents can be found at the bottom of the page.\n\n### Funding Agreement (DBA) Summary\n\nLeigh Day realise that the sign-up documents are lengthy and contain legal jargon that they are required to provide to you by law.  They have therefore set out below a summary of the main terms found within these documents.\n\n### Legal funding\n\n- You are signing a “no-win, no-fee” agreement. If Leigh Day don’t win compensation for you, and you keep to the terms of the agreement, you won’t be charged a penny.\n\n- If you do win, Leigh Day will deduct a fee equivalent to 25% (plus VAT) of any compensation obtained. The current VAT rate is 20%, which means that the total of amount of compensation payable to Leigh Day would be 30%.\n\n- In the end, no matter what, you will get 70% of your compensation (so for every £100 that you win, you will keep £70, minus any deductions for tax and National Insurance). Leigh Day think that’s fair as they are taking a risk taking the case on a “no-win, no-fee” basis and we hope that you feel this is fair too.\n\n- This means that either way the case is decided, you will not be left out of pocket. Leigh Day will never ask you to pay any fees upfront or throughout the life of the claim.\n\n### Co-operating with Leigh Day\n\n- As part of the agreement, Leigh Day require you to keep in touch with Leigh Day and to behave reasonably. If you fail to cooperate with Leigh Day, e.g. by not providing Leigh Day with your up-to-date contact details or ignoring calls, emails or letters, then Leigh Day will no longer be able to act for you and will treat you as ending the agreement. Therefore, please only sign up if you are willing to cooperate. Please refer to the funding documents for Leigh Day's rights if you fail to co-operate.\n\n- To be eligible as a client, you need to be an hourly-paid store worker or have left your employment within the last six months. This is due to the strict time limits in place for submitting a claim to the Employment Tribunal once your employment has ended.\n\n### Changing your mind\n\n- You have 14 days from signing up to change your mind about proceeding with the action and simply need to inform Leigh Day in writing that you no longer wish to proceed with the claim.\n\nPlease note, reading this summary is not a substitute for reading the funding documents themselves.\n\n{{document.URL.includes('maddisonclarke.co.uk') ? `[Read full Client Care and Costs Letter and Damaged Based Agreement](https://maddisonclarke.co.uk/wp-content/uploads/2025/03/NEXT_DBA.pdf)` : `[Read full Client Care and Costs Letter and Damaged Based Agreement](https://www.fairpayforall.co.uk/wp-content/uploads/2021/04/Next-2023.04.06-CCL-DBA.pdf)` }}\n\nBy clicking the 'I accept' button below you will have joined the Next equal pay claim. If your claim is successful, you agree to pay Leigh Day a fee equivalent to 25% plus VAT of any compensation received from Next.\n\nYou have the right to cancel your agreement with Leigh Day within 14 days of entering it.\n\nLeigh Day's Privacy Policy can be found [here](https://www.leighday.co.uk/our-privacy-and-cookies-policy/)."
+                  }
+                ]
+              }
+            ]
+          },
+          "p4": {
+            "title": "Thank you",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "## Thank you for completing the form to join the Next Equal Pay Claim, please keep an eye out for an email from us.\n\nIf you haven’t received a confirmation email within 48 hours, please contact Leigh Day’s Next Equal Pay Claims team at coopequalpay@leighday.co.uk."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "options": []
+      }
+    ],
+    "decisionType": "next"
+  },
+  {
+    "heading": "SorryPage1",
+    "text": "Sorry",
+    "descriptions": "You cannot join the group action. Press Continue to learn why.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-next` : `https://fairpayforall.co.uk/sorry-next` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorrypageUnder18",
+    "text": "Sorry",
+    "descriptions": "Unfortunately under 18’s have a different sign up process and you are unable to sign up on our website.  Should you wish to sign up please call us on 0161 823 3775.  Thanks",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-next` : `https://fairpayforall.co.uk/sorry-next` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorryPage3",
+    "text": "Sorry",
+    "descriptions": "Unfortunately under 18’s have a different sign up process and you are unable to sign up on our website. Please contact Leigh Day to see if you can join.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-next` : `https://fairpayforall.co.uk/sorry-next` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorryPageBelfast",
+    "text": "Sorry",
+    "descriptions": "Our partner law firm can't act on behalf of clients who live in Northern Ireland.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-next` : `https://fairpayforall.co.uk/sorry-next` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  }
+]

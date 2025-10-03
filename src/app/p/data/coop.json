@@ -1,0 +1,462 @@
+[
+  {
+    "heading": "Are you still employed by the Co-operative Group Limited?",
+    "text": "Are you still employed by the Co-operative Group Limited?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "still_work_at_store",
+        "type": "question",
+        "hint": "Are you still employed by the Co-operative Group Limited?",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "When did you leave?",
+        "if_condition": "formData['still_work_at_store'].value === 'No'"
+      },
+      {
+        "headingTo": "Which Co-op store do you work at?",
+        "if_condition": "formData['still_work_at_store'].value === 'Yes'"
+      }
+    ]
+  },
+
+  {
+    "heading": "When did you leave?",
+    "text": "When did you leave?",
+    "descriptions": "To make a valid claim you must have worked in a Co-op store in THE LAST 6 MONTHS.",
+    "fields": [
+      {
+        "label": "dateleft",
+        "hint": "Date Left",
+        "type": "Date",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Which Co-op store do you work at?",
+        "if_condition": "calculateDayDistances(formData['dateleft'].value) <= 161"
+      },
+      {
+        "headingTo": "SorryPage1",
+        "if_condition": "calculateDayDistances(formData['dateleft'].value) > 161"
+      }
+    ]
+  },
+  {
+    "heading": "Which Co-op store do you work at?",
+    "text": "{{ formData['still_work_at_store'].value ==`Yes`? `Which Co-op store do you work at?`:`Which Co-op store did you work at?` }}",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "storelocation",
+        "hint": "Store Location",
+        "type": "text",
+        "condition": "formData['storelocation'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Were you on an hourly rate?",
+    "text": "Were you on an hourly rate?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "hourly_rate",
+        "type": "question",
+        "hint": "Were you on an hourly rate?",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Step Personal info",
+        "if_condition": "formData['hourly_rate'].value === 'Yes'"
+      },
+      {
+        "headingTo": "SorryPage1",
+        "if_condition": "formData['hourly_rate'].value === 'No'"
+      }
+    ]
+  },
+  {
+    "heading": "Step Personal info",
+    "text": "What is your Name",
+    "descriptions": "Please provide your full name",
+    "fields": [
+      {
+        "label": "firstname",
+        "hint": "First Name",
+        "type": "text",
+        "condition": "formData['firstname'].value !== '' && /^[A-Za-z- ]+$/.test(formData['firstname'].value)",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      },
+      {
+        "label": "lastname",
+        "hint": "Last Name",
+        "type": "text",
+        "condition": "formData['lastname'].value !== '' && /^[A-Za-z- ]+$/.test(formData['lastname'].value)",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "What Is Your Date of Birth?",
+    "text": "What Is Your Date of Birth?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "dob",
+        "hint": "Date of Birth",
+        "type": "dob",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Gender",
+        "if_condition": "calculateAge(formData['dob'].value) >= 18"
+      },
+      {
+        "headingTo": "SorrypageUnder18",
+        "if_condition": "formData['dob'].value !== '' && calculateAge(formData['dob'].value) < 18"
+      }
+    ]
+  },
+  {
+    "heading": "Gender",
+    "text": "Gender",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "gender",
+        "type": "question",
+        "hint": "Gender",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Male", "Female"],
+        "allowedAnswer": ["Male", "Female"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "address",
+        "if_condition": "formData['gender'].value !== ''"
+      }
+    ]
+  },
+  {
+    "heading": "address",
+    "text": "Address",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "address",
+        "hint": "Address",
+        "type": "address",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Phone Number",
+        "if_condition": "formData['address'].value !== '' && !formData['postcode'].value.toUpperCase().startsWith('BT')"
+      },
+      {
+        "headingTo": "SorryPageBelfast",
+        "if_condition": "formData['postcode'].value.toUpperCase().startsWith('BT')"
+      }
+    ]
+  },
+  {
+    "heading": "Phone Number",
+    "text": "Phone Number",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "telphone",
+        "hint": "Phone",
+        "type": "phone",
+        "condition": "formData['telphone'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Step Email",
+    "text": "What is Your Email Address?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "email",
+        "hint": "Email",
+        "type": "email",
+        "condition": "formData['email'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Step Staff Number",
+    "text": "Please Enter Your Employee or National Insurance Number (OPTIONAL)",
+    "descriptions": "If you don't have it to hand you can skip this for now. However, this information will be requested from you again in the future as the claim progresses.",
+    "fields": [
+      {
+        "label": "ni_number",
+        "hint": "NI Number",
+        "type": "text",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      },
+      {
+        "label": "employee_number",
+        "hint": "Employee Number",
+        "type": "text",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Future Marketing",
+    "text": "Future Marketing",
+    "descriptions": "{{document.URL.includes('maddisonclarke.co.uk') ? `I consent to Maddison Clarke sending future communications about any relevant services and products.` : `I consent to Fair Pay For All sending future communications about any relevant services and products.` }}",
+    "fields": [
+      {
+        "label": "futuremarketing",
+        "type": "question",
+        "hint": "Future Marketing",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "AcceptDBA",
+        "if_condition": "formData['futuremarketing'].value === 'Yes'"
+      },
+      {
+        "headingTo": "AcceptDBA",
+        "if_condition": "formData['futuremarketing'].value === 'No'"
+      }
+    ]
+  },
+  {
+    "heading": "Privacy Policy",
+    "text": "",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "privacypolicy",
+        "hint": "Privacy Policy",
+        "type": "question",
+        "question": "{{document.URL.includes('maddisonclarke.co.uk') ? `I understand that I am providing my contact details by way of email, phone and text in order for Maddison Clarke and Leigh Day to contact me about this claim and that details about how Maddison Clarke will further use my details can be found in the Privacy Policy.` : `I understand that I am providing my contact details by way of email, phone and text in order for Fair Pay for All and Leigh Day to contact me about this claim and that details about how Fair Pay for All will further use my details can be found in the Privacy Policy.`}}        ",
+        "options": ["Yes"],
+        "allowedAnswer": ["Yes"],
+        "selectsearch_options": [],
+        "agreements": {},
+        "condition": "true"
+      }
+    ]
+  },
+  {
+    "heading": "AcceptDBA",
+    "text": "",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "",
+        "type": "agreement",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {
+          "p1": {
+            "title": "Privacy Policy",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "{{document.URL.includes('maddisonclarke.co.uk') ? `I understand that I am providing my contact details by way of email, phone and text in order for Maddison Clarke and Leigh Day to contact me about this claim and that details about how Maddison Clarke will further use my details can be found in the [Privacy Policy](https://maddisonclarke.co.uk/privacy-policy/). \\n\\n ` : `I understand that I am providing my contact details by way of email, phone and text in order for Fair Pay for All and Leigh Day to contact me about this claim and that details about how Fair Pay for All will further use my details can be found in the [Privacy Policy](https://www.fairpayforall.co.uk/privacy-policy/).\\n\\n `}} "
+                  }
+                ]
+              }
+            ]
+          },
+          "p2": {
+            "title": "Final Step",
+            "author": "I Accept",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "TO COMPLETE YOUR REGISTRATION, YOU MUST AGREE TO LEIGH DAY'S PAPERWORK. YOU CAN DO THIS BY PRESSING 'I ACCEPT' AT THE BOTTOM OF THE PAGE.\n\nIf all of your information is correct, Leigh Day solicitors are willing to represent you in your equal pay claim against Co-op on a no-win no-fee basis, subject to regulatory checks.\n\nIf you want Leigh Day to bring a claim for you, you need to click the accept button at the bottom of this page. This confirms you have read and agree to the client care and costs letter, form of authority, and the Damages-Based Agreement (‘DBA’) below. You also agree that this agreement is of your own free will."
+                  }
+                ]
+              }
+            ]
+          },
+          "p3": {
+            "title": "Read More in Final Step",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "Leigh Day can terminate the DBA at any time at no cost to you. You have the right to cancel your agreement within 14 days, but after this point if you terminate the DBA before the end of the claim or act unreasonably (please see sections 7 and 10 of the DBA), you may be required to pay Leigh Day your share of costs as they are at that time.\n\nThe button to agree to these documents can be found at the bottom of the page.\n\n### Funding Agreement (DBA) Summary\n\nLeigh Day realise that the sign-up documents are lengthy and contain legal jargon that they are required to provide to you by law.  They have therefore set out below a summary of the main terms found within these documents.\n\n### Legal funding\n\n- You are signing a “no-win, no-fee” agreement. If Leigh Day don’t win compensation for you, and you keep to the terms of the agreement, you won’t be charged a penny.\n\n- If you do win, Leigh Day will deduct a fee equivalent to 25% (plus VAT) of any compensation obtained. The current VAT rate is 20%, which means that the total of amount of compensation payable to Leigh Day would be 30%.\n\n- In the end, no matter what, you will get 70% of your compensation (so for every £100 that you win, you will keep £70, minus any deductions for tax and National Insurance). Leigh Day think that’s fair as they are taking a risk taking the case on a “no-win, no-fee” basis and we hope that you feel this is fair too.\n\n- This means that either way the case is decided, you will not be left out of pocket. Leigh Day will never ask you to pay any fees upfront or throughout the life of the claim.\n\n### Co-operating with Leigh Day\n\n- As part of the agreement, Leigh Day require you to keep in touch with Leigh Day and to behave reasonably. If you fail to cooperate with Leigh Day, e.g. by not providing Leigh Day with your up-to-date contact details or ignoring calls, emails or letters, then Leigh Day will no longer be able to act for you and will treat you as ending the agreement. Therefore, please only sign up if you are willing to cooperate. Please refer to the funding documents for Leigh Day's rights if you fail to co-operate.\n\n- To be eligible as a client, you need to be an hourly-paid store worker or have left your employment within the last six months. This is due to the strict time limits in place for submitting a claim to the Employment Tribunal once your employment has ended.\n\n### Changing your mind\n\n- You have 14 days from signing up to change your mind about proceeding with the action and simply need to inform Leigh Day in writing that you no longer wish to proceed with the claim.\n\nPlease note, reading this summary is not a substitute for reading the funding documents themselves.\n\n{{document.URL.includes('maddisonclarke.co.uk') ? `[Read full Client Care and Costs Letter and Damaged Based Agreement](https://maddisonclarke.co.uk/wp-content/uploads/2025/03/COOP_DBA.pdf)` : `[Read full Client Care and Costs Letter and Damaged Based Agreement](https://www.fairpayforall.co.uk/wp-content/uploads/2023/07/CO-OP_DBA.pdf)` }}\n\nBy clicking the 'I accept' button below you will have joined the Co-op equal pay claim. If your claim is successful, you agree to pay Leigh Day a fee equivalent to 25% plus VAT of any compensation received from Co-op.\n\nYou have the right to cancel your agreement with Leigh Day within 14 days of entering it.\n\nLeigh Day's Privacy Policy can be found [here](https://www.leighday.co.uk/our-privacy-and-cookies-policy/)."
+                  }
+                ]
+              }
+            ]
+          },
+          "p4": {
+            "title": "Thank you",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "## Thank you for completing the form to join the Co-op Equal Pay Claim. Please keep an eye out for an email from us.\n\nIf you haven’t received a confirmation email within 48 hours, please contact Leigh Day’s Co-op Equal Pay Claims team at [coopequalpay@leighday.co.uk](mailto:coopequalpay@leighday.co.uk)."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "options": []
+      }
+    ],
+    "decisionType": "next"
+  },
+  {
+    "heading": "SorryPage1",
+    "text": "Sorry",
+    "descriptions": "You cannot join the group action. Press Continue to learn why.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-coop` : `https://fairpayforall.co.uk/sorry-co-op` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorrypageUnder18",
+    "text": "Sorry",
+    "descriptions": "Unfortunately under 18’s have a different sign up process and you are unable to sign up on our website.  Should you wish to sign up please call us on 0161 823 3775.  Thanks",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-coop` : `https://fairpayforall.co.uk/sorry-co-op` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorryPage3",
+    "text": "Sorry",
+    "descriptions": "Unfortunately under 18’s have a different sign up process and you are unable to sign up on our website. Please contact Leigh Day to see if you can join.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-coop` : `https://fairpayforall.co.uk/sorry-co-op` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorryPageBelfast",
+    "text": "Sorry",
+    "descriptions": "Our partner law firm can't act on behalf of clients who live in Northern Ireland.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-coop` : `https://fairpayforall.co.uk/sorry-co-op` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  }
+]

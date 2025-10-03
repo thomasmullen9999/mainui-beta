@@ -1,0 +1,414 @@
+[
+  {
+    "heading": "Have you driven for Bolt within the last 10 weeks?",
+    "text": "Have you driven for Bolt within the last 10 weeks?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "Last10Weeks",
+        "type": "question",
+        "hint": "Have you driven for Bolt within the last 10 weeks?",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Are You a Black Cab/Hackney Carriage Driver?",
+        "if_condition": "formData['Last10Weeks'].value === 'Yes'"
+      },
+      {
+        "headingTo": "SorryPage1",
+        "if_condition": "formData['Last10Weeks'].value === 'No'"
+      }
+    ]
+  },
+  {
+    "heading": "Are You a Black Cab/Hackney Carriage Driver?",
+    "text": "Are You a Black Cab/Hackney Carriage Driver?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "Blackcab",
+        "type": "question",
+        "hint": "Are You a Black Cab/Hackney Carriage Driver?",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "When did you last complete a trip for Bolt?",
+        "if_condition": "formData['Blackcab'].value === 'No'"
+      },
+      {
+        "headingTo": "SorryPage2",
+        "if_condition": "formData['Blackcab'].value === 'Yes'"
+      }
+    ]
+  },
+  {
+    "heading": "When did you last complete a trip for Bolt?",
+    "text": "When did you last complete a trip for Bolt?",
+    "descriptions": "To qualify you must have driven for Bolt within the past 10 weeks, or after {{ new Date().toLocaleDateString() }}. If you can't remember the exact date, please enter a close estimation. Please enter DD/MM/YYYY.",
+    "fields": [
+      {
+        "label": "LastDelivery",
+        "hint": "Last Delivery",
+        "type": "Date",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Step Personal info",
+        "if_condition": "calculateDayDistances(formData['LastDelivery'].value) <= 70"
+      },
+      {
+        "headingTo": "SorryPage1",
+        "if_condition": "calculateDayDistances(formData['LastDelivery'].value) > 70"
+      }
+    ]
+  },
+  {
+    "heading": "Step Personal info",
+    "text": "What is your Name",
+    "descriptions": "Please provide your full name",
+    "fields": [
+      {
+        "label": "firstname",
+        "hint": "First Name",
+        "type": "text",
+        "condition": "formData['firstname'].value !== '' && /^[A-Za-z- ]+$/.test(formData['firstname'].value)",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      },
+      {
+        "label": "lastname",
+        "hint": "Last Name",
+        "type": "text",
+        "condition": "formData['lastname'].value !== '' && /^[A-Za-z- ]+$/.test(formData['lastname'].value)",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "When Is Your Date of Birth?",
+    "text": "When Is Your Date of Birth?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "dob",
+        "hint": "Date of Birth",
+        "type": "dob",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "address",
+        "if_condition": "calculateAge(formData['dob'].value) >= 18"
+      },
+      {
+        "headingTo": "SorryPage3",
+        "if_condition": "calculateAge(formData['dob'].value) < 18"
+      }
+    ]
+  },
+
+  {
+    "heading": "address",
+    "text": "Address",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "address",
+        "hint": "Address",
+        "type": "address",
+        "condition": "formData['address'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Phone Number",
+    "text": "Phone Number",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "telphone",
+        "hint": "Phone",
+        "type": "phone",
+        "condition": "formData['telphone'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Step Email",
+    "text": "What is Your Email Address?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "email",
+        "hint": "Email",
+        "type": "email",
+        "condition": "formData['email'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+  {
+    "heading": "Is This The Same Email Address As On Your Bolt Account?",
+    "text": "Is This The Same Email Address As On Your Bolt Account?",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "sameemail",
+        "type": "question",
+        "hint": "Is This The Same Email Address As On Your Bolt Account?",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "Future Marketing",
+        "if_condition": "formData['sameemail'].value === 'Yes'"
+      },
+      {
+        "headingTo": "Email address linked to your Bolt account",
+        "if_condition": "formData['sameemail'].value === 'No'"
+      }
+    ]
+  },
+  {
+    "heading": "Email address linked to your Bolt account",
+    "text": "Please Enter The Email address Linked to Your Bolt Account",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "email_bolt",
+        "hint": "Email",
+        "type": "email",
+        "condition": "formData['email_bolt'].value !== ''",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ]
+  },
+
+  {
+    "heading": "Future Marketing",
+    "text": "Future Marketing",
+    "descriptions": "{{document.URL.includes('maddisonclarke.co.uk') ? `I consent to Maddison Clarke sending future communications about any relevant services and products.` : `I consent to Fair Pay For All sending future communications about any relevant services and products.` }}",
+    "fields": [
+      {
+        "label": "futuremarketing",
+        "type": "question",
+        "hint": "Future Marketing",
+        "question": "",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": ["Yes", "No"],
+        "allowedAnswer": ["Yes", "No"],
+        "condition": "true"
+      }
+    ],
+    "decisionType": "calculate",
+    "pathcondition": [
+      {
+        "headingTo": "AcceptDBA",
+        "if_condition": "formData['futuremarketing'].value === 'Yes'"
+      },
+      {
+        "headingTo": "AcceptDBA",
+        "if_condition": "formData['futuremarketing'].value === 'No'"
+      }
+    ]
+  },
+  {
+    "heading": "Privacy Policy",
+    "text": "",
+    "descriptions": "give us info",
+    "fields": [
+      {
+        "label": "privacypolicy",
+        "hint": "Privacy Policy",
+        "type": "question",
+        "question": "{{document.URL.includes('maddisonclarke.co.uk') ? `I understand that I am providing my contact details by way of email, phone and text in order for Maddison Clarke and Leigh Day to contact me about this claim and that details about how Maddison Clarke will further use my details can be found in the Privacy Policy.` : `I understand that I am providing my contact details by way of email, phone and text in order for Fair Pay for All and Leigh Day to contact me about this claim and that details about how Fair Pay for All will further use my details can be found in the Privacy Policy.`}}        ",
+        "options": ["Yes"],
+        "allowedAnswer": ["Yes"],
+        "selectsearch_options": [],
+        "agreements": {},
+        "condition": "true"
+      }
+    ]
+  },
+  {
+    "heading": "AcceptDBA",
+    "text": "",
+    "descriptions": "",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "",
+        "type": "agreement",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {
+          "p1": {
+            "title": "Privacy Policy",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "{{document.URL.includes('maddisonclarke.co.uk') ? `I understand that I am providing my contact details by way of email, phone and text in order for Maddison Clarke and Leigh Day to contact me about this claim and that details about how Maddison Clarke will further use my details can be found in the [Privacy Policy](https://maddisonclarke.co.uk/privacy-policy/). \\n\\n ` : `I understand that I am providing my contact details by way of email, phone and text in order for Fair Pay for All and Leigh Day to contact me about this claim and that details about how Fair Pay for All will further use my details can be found in the [Privacy Policy](https://www.fairpayforall.co.uk/privacy-policy/).\\n\\n `}} "
+                  }
+                ]
+              }
+            ]
+          },
+          "p2": {
+            "title": "Final Step",
+            "author": "I Accept",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "{{ document.URL.includes('maddisonclarke.co.uk') ? `We understand that [the sign-up documents](https://maddisonclarke.co.uk/wp-content/uploads/2025/03/BOLT_DBA.pdf) are lengthy and contain legal jargon, however it is required by law that they are provided to you.` : `We understand that [the sign-up documents](https://www.fairpayforall.co.uk/wp-content/uploads/2023/07/BOLT_DBA.pdf) are lengthy and contain legal jargon, however it is required by law that they are provided to you.`}} \n\nBelow is a summary of the main points in those documents. Please note, reading this summary is not a substitute for reading the funding documents themselves."
+                  }
+                ]
+              }
+            ]
+          },
+          "p3": {
+            "title": "Read More in Final Step",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "You have the right to cancel your agreement with Leigh Day within 14 days of entering it. If you terminate the CCL after that, you will be required to pay Leigh Day your share of the total costs and disbursements incurred to date + VAT (see paragraphs 8 and 10 of the DBA).\n\nThe full terms of the CCL and DBA are linked below. For a summary of the main points, please read the following information below. The button to agree to these documents can be found at the bottom of the page.\n\nWe understand that the sign-up documents are lengthy and contain legal jargon that we are required to provide to you by law. We have therefore put together below a summary of the main points and terms that are included in these documents.\n\n### Legal funding\n\nYou are signing a “no-win, no-fee” agreement. If Leigh Day don’t win compensation for you, and you keep to the terms of the agreement, you won’t be charged a penny.\n\nIf you do win, Leigh Day will deduct 25% of the compensation you receive if you win your claim. This percentage is excluding VAT and they have to charge VAT on their legal costs so at the current VAT rate of 20% the total DBA Payment including VAT will be 30% of the compensation you receive.\n\nNo matter what, if the claim is successful, you will only pay Leigh Day 25% plus VAT of whatever compensation you receive. If the claim succeeds, they’ll give you a full breakdown, so you’ll understand what they've charged.\n\n### Co-operating with Leigh Day\n\nIt’s really important that you co-operate with Leigh Day. If you fail to co-operate with them by not providing them with your up-to-date contact details or required evidence / documents, or ignoring their calls, emails or letters, then they will no longer be able to act for you. They will do all that they can to make it as easy as possible for you to take part in the claim.\n\nTo be eligible as a client, you need to have completed a journey for Bolt in the last 10 weeks from today’s date.\n\nYour claim will be brought in the Employment Tribunal where the general rule is that each party covers their own costs, no matter who wins or loses. As explained above, you will only pay us 25% plus VAT if you win your claim. The Employment Tribunal does have the power to order that a party (for example, someone bringing a claim) pays costs if they have behaved badly, such as lying to the Employment Tribunal or not co-operating with the Employment Tribunal process. Leigh Day do not think that there is a risk that an Employment Tribunal would order you to pay costs if you brought a claim, and they would let you know immediately if this changed.\n\n### Changing your mind\n\nYou have 14 days from the day you sign up to change your mind about proceeding with the action and simply need to inform Leigh Day in writing that you no longer wish to proceed with the claim.\n\nPlease note, reading this summary is not a substitute for reading the funding documents themselves.\n\nWe treat all information in accordance with our [privacy policy](https://www.fairpayforall.co.uk/privacy-policy/)."
+                  }
+                ]
+              }
+            ]
+          },
+          "p4": {
+            "title": "Thank you",
+            "author": "LD",
+            "date": "",
+            "content": [
+              {
+                "type": "markdown",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "## Thank you for completing the form to join the Bolt Equal Pay Claim. Please keep an eye out for an email from us.\n\nIf you haven’t received a confirmation email within 48 hours, please contact Leigh Day’s Bolt Equal Pay Claims team at [boltequalpay@leighday.co.uk](mailto:boltequalpay@leighday.co.uk)."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "options": []
+      }
+    ],
+    "decisionType": "next"
+  },
+  {
+    "heading": "SorryPage1",
+    "text": "Sorry",
+    "descriptions": "Thank you for your interest in joining the Bolt drivers claim. Unfortunately, we are only bringing claims for drivers who have driven for Bolt within the last 10 weeks. Therefore, we are unable to assist you further. If your position changes, please do come back to complete the form.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-bolt` : `https://fairpayforall.co.uk/sorry-bolt` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorryPage2",
+    "text": "Sorry",
+    "descriptions": "Thank you for your interest in joining the Bolt claim. Unfortunately, we are only bringing claims for drivers who have worked as self-employed independent contractors. Therefore, we are unable to assist you further. If your position changes, please do come back to complete the form.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-bolt` : `https://fairpayforall.co.uk/sorry-bolt` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  },
+  {
+    "heading": "SorryPage3",
+    "text": "Sorry",
+    "descriptions": "Unfortunately under 18’s have a different sign up process and you are unable to sign up on our website. Please contact Leigh Day to see if you can join.",
+    "fields": [
+      {
+        "label": "info",
+        "hint": "{{document.URL.includes('maddisonclarke.co.uk') ? `https://maddisonclarke.co.uk/sorry-bolt` : `https://fairpayforall.co.uk/sorry-bolt` }}",
+        "type": "info",
+        "condition": "true",
+        "selectsearch_options": [],
+        "agreements": {},
+        "options": []
+      }
+    ],
+    "decisionType": "redirect"
+  }
+]
