@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { addDays, format } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -245,10 +246,48 @@ const FORM_STEP_LIMITS_DBA = {
   morrisons: 13,
 };
 
+type CampaignKey =
+  | "morrisons"
+  | "asda"
+  | "sainsburys"
+  | "coop"
+  | "next"
+  | "justeat";
+
+const campaignExpiryValues: Record<CampaignKey, number> = {
+  morrisons: 161,
+  asda: 2002,
+  sainsburys: 161,
+  coop: 161,
+  next: 161,
+  justeat: 70,
+};
+
+function addDaysToDate(dateStr: string, days: any): string {
+  const date = new Date(dateStr);
+  const newDate = addDays(date, days);
+  return format(newDate, "yyyy-MM-dd");
+}
+
+function daysUntil(dateStr: string): number {
+  const targetDate = new Date(dateStr);
+  const today = new Date();
+
+  // normalize to midnight to avoid time zone issues
+  targetDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+
+  const diffTime = targetDate.getTime() - today.getTime();
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+  return diffDays;
+}
+
 function App({ params }: { params: { slug: string[] } }) {
   const [domain, setDomain] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [leadUUID, setLeadUUID] = useState("");
+  const [leadbyteID, setLeadbyteID] = useState("");
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [currentStep, setCurrentStep] = useState(0);
   const [isNextAble, setIsNextAble] = useState(true);
@@ -283,8 +322,8 @@ function App({ params }: { params: { slug: string[] } }) {
   const isMCDomain = domain?.includes("maddisonclarke");
 
   const allowedForm = isMCDomain
-    ? ["coop"]
-    : ["asda", "sainsburys", "morrisons", "coop", "next"];
+    ? ["coop", "justeat"]
+    : ["justeat", "asda", "sainsburys", "morrisons", "coop", "next"];
 
   const firstAgreement = configData
     .find((item) => item.fields?.some((field) => field.type === "agreement"))
@@ -370,6 +409,7 @@ function App({ params }: { params: { slug: string[] } }) {
       })
         .then((res) => res.json())
         .then((data) => {
+          console.log(data, "chahaha");
           if (data && data.formData) {
             // Merge existing data with current form structure
             setFormData((prevFormData) => {
@@ -424,7 +464,7 @@ function App({ params }: { params: { slug: string[] } }) {
   }, [retrieval_lead_id, hasLoadedExistingData, isLoadingExistingData]);
 
   useEffect(() => {
-    // console.log(leadUUID, "leadUUID from useEffect");
+    console.log(leadUUID, "leadUUID from useEffect");
   }, [leadUUID]);
 
   // Initialize form data (runs when formslug changes)
@@ -571,7 +611,7 @@ function App({ params }: { params: { slug: string[] } }) {
         (currentStepLocal >= 17 && currentStepLocal <= 21)
       ) {
         const fd = latestFormDataRef.current || {};
-        // console.log(fd, "formData before unload");
+        console.log(fd, "formData before unload");
 
         // Safeguard: don't overwrite leads that are already sold
         const existingStatus = fd?.status || fd?.lead_status;
@@ -689,7 +729,34 @@ function App({ params }: { params: { slug: string[] } }) {
   };
 
   const sendNurtureLead = async () => {
+    let expiryDate = "";
+    let daysLeft;
+    if (formData.still_work_at_store.value === "No") {
+      expiryDate = addDaysToDate(
+        formData.dateleft.value,
+        campaignExpiryValues[formData.campaign.value as CampaignKey]
+      );
+      daysLeft = daysUntil(expiryDate);
+    }
+
+    formData.expiry_date = {
+      label: "Expiry Date",
+      value: expiryDate,
+    };
+
+    formData.days_left = {
+      label: "Days Left",
+      value: daysLeft,
+    };
+
+    formData.leadbyte_id = {
+      label: "Leadbyte ID",
+      value: "",
+    };
     setIsSubmitting(true);
+
+    console.log(formData, "hyuhyuuu");
+
     try {
       const response = await fetch("/api/leadtransfer", {
         method: "POST",
@@ -699,9 +766,25 @@ function App({ params }: { params: { slug: string[] } }) {
       });
 
       const data = await response.json();
+
+      console.log(data, "data from lead transfer");
       // move to next step only after we have data (but don't cause loops)
       if (data) {
         setLeadUUID(data.lead_id);
+        setLeadbyteID(data.leadbyte.records[0].response.leadId);
+        formData.leadbyte_id.value = data.leadbyte.records[0].response.leadId;
+        try {
+          const response = await fetch("/api/sendleadbyteid", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ leadUUID: data.lead_id, formData }),
+          });
+
+          const result = await response.json();
+          console.log("Updated lead:", result);
+        } catch (error) {
+          console.error("Error updating lead:", error);
+        }
         // Only advance if currentStep hasn't already changed elsewhere
         setCurrentStep((s) => s + 1);
       }
@@ -713,7 +796,7 @@ function App({ params }: { params: { slug: string[] } }) {
   };
 
   const handleNextButtonClick = () => {
-    // console.log(configData, "configData");
+    console.log(configData, "configData");
     const fields = configData[currentStep].fields;
     const decisionType = configData[currentStep].decisionType;
     let nextStep: number | undefined;
@@ -786,7 +869,10 @@ function App({ params }: { params: { slug: string[] } }) {
           formData: formData,
           lead_status: "nurture",
           id: leadUUID || formData.uuid?.value,
+          leadbyteId: leadbyteID || "",
         };
+
+        console.log(payload, "buuu");
 
         // Save progress asynchronously (don't block UI)
         fetch("/api/updatelead", {
@@ -1047,6 +1133,7 @@ function App({ params }: { params: { slug: string[] } }) {
               formData={formData}
               slug={formslug}
               agreements={firstAgreement}
+              leadbyteId={leadbyteID}
             />
           );
         } else {
@@ -1208,13 +1295,6 @@ function App({ params }: { params: { slug: string[] } }) {
     formData.latest_step.value = "Final Step";
   }
 
-  if (formslug === "justeat" && retrieval_lead_id) {
-    formData.latest_step = {
-      label: "Latest Step",
-      value: "Final Step",
-    };
-  }
-
   if (
     retrieval_lead_id &&
     formData &&
@@ -1232,6 +1312,7 @@ function App({ params }: { params: { slug: string[] } }) {
                 slug={formslug}
                 uuid={retrieval_lead_id}
                 agreements={firstAgreement}
+                leadbyteId={leadbyteID}
               />
             </div>
           </div>

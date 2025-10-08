@@ -26,9 +26,9 @@ const CONFIG_MAP = {
   bolt: configDataBolt,
 };
 
-function firstCharLower(str: String) {
-  if (!str) return ""; // handle empty or null strings
-  return str.charAt(0).toLowerCase();
+// --- Safe getter helper ---
+function safeValue(obj: any, key: string, fallback: any = "") {
+  return obj?.[key]?.value ?? fallback;
 }
 
 function validationFunction(data: LeadHistory): boolean {
@@ -145,12 +145,13 @@ function toLeadByteCampaignBillable(campaign: string, formData: any): string {
 
   if (campaign === "asda") {
     const currentDate = new Date();
-    const formDate = new Date(formData.dateleft.value);
+    const formDate = new Date(safeValue(formData, "dateleft"));
     const monthsDifference =
       (currentDate.getFullYear() - formDate.getFullYear()) * 12 +
       (currentDate.getMonth() - formDate.getMonth());
 
-    return monthsDifference > 6 && formData.still_work_at_store.value !== "Yes"
+    return monthsDifference > 6 &&
+      safeValue(formData, "still_work_at_store") !== "Yes"
       ? "ASDA-CIV"
       : "ASDA-BIL";
   }
@@ -167,7 +168,7 @@ async function server_marketing_tracking(formData: any, ip_address: string) {
         email: [
           crypto
             .createHash("sha256")
-            .update(formData.email.value.trim().toLowerCase())
+            .update(safeValue(formData, "email").trim().toLowerCase())
             .digest("hex"),
         ],
         phone: [
@@ -175,7 +176,7 @@ async function server_marketing_tracking(formData: any, ip_address: string) {
             .createHash("sha256")
             .update(
               "+44" +
-                formData.telphone.value
+                (safeValue(formData, "telphone") || "")
                   .replace(/\s/g, "")
                   .trim()
                   .slice(-10)
@@ -183,14 +184,14 @@ async function server_marketing_tracking(formData: any, ip_address: string) {
             )
             .digest("hex"),
         ],
-        ttp: formData.ttp.value,
-        ttclid: formData.ttclid.value,
+        ttp: safeValue(formData, "ttp"),
+        ttclid: safeValue(formData, "ttclid"),
         ip: ip_address,
-        user_agent: formData.user_agent.value,
+        user_agent: safeValue(formData, "user_agent"),
       },
       page: {
-        url: formData.page_url.value,
-        referrer: formData.referrer.value,
+        url: safeValue(formData, "page_url"),
+        referrer: safeValue(formData, "referrer"),
       },
     };
 
@@ -239,13 +240,18 @@ async function isBitlyIdUnique(
   return count === 0;
 }
 
-function isValidWorkStatus(formData: any): boolean {
-  const stillWork = formData.still_work_at_store?.value;
-  const dateleft = formData.dateleft?.value;
+// --- Employment validation helper ---
+function isEmploymentStatusValid(formData: any): boolean {
+  if (safeValue(formData, "campaign") === "justeat") {
+    return true; // Ignore conditions for justeat
+  }
+
+  const stillWork = safeValue(formData, "still_work_at_store");
+  const dateLeft = safeValue(formData, "dateleft");
 
   return (
-    (stillWork === "Yes" && (!dateleft || dateleft.trim() === "")) ||
-    (stillWork === "No" && dateleft && dateleft.trim() !== "")
+    (stillWork === "Yes" && (!dateLeft || dateLeft === "")) ||
+    (stillWork === "No" && dateLeft && dateLeft !== "")
   );
 }
 
@@ -274,11 +280,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: Request) {
-  console.log(req, "got int");
   const { formData, lead_id } = await req.json();
   const date = new Date();
-
-  console.log(formData, "formdata in put", lead_id, "lead id in put");
 
   let checkdata;
 
@@ -309,16 +312,23 @@ export async function PUT(req: Request) {
     return NextResponse.json({ msg: "Invalid Data" }, { status: 400 });
   }
 
-  if (formData.new_still_work_at_store) {
-    newFormData.still_work_at_store.value =
-      formData.new_still_work_at_store.value;
+  if (!isEmploymentStatusValid(formData)) {
+    return NextResponse.json(
+      { msg: "Employment status and date left are inconsistent" },
+      { status: 400 }
+    );
   }
-  if (formData.new_dateleft) {
-    newFormData.dateleft.value = formData.new_dateleft.value;
-  }
-  if (formData.new_LastDelivery) {
-    newFormData.LastDelivery.value = formData.new_LastDelivery.value;
-  }
+
+  if (formData?.new_still_work_at_store)
+    newFormData.still_work_at_store = {
+      value: safeValue(formData, "new_still_work_at_store"),
+    };
+  if (formData?.new_dateleft)
+    newFormData.dateleft = { value: safeValue(formData, "new_dateleft") };
+  if (formData?.new_LastDelivery)
+    newFormData.LastDelivery = {
+      value: safeValue(formData, "new_LastDelivery"),
+    };
 
   newFormData.lead_sold_timestamp = {
     label: "Lead Sold Timestamp",
@@ -327,7 +337,10 @@ export async function PUT(req: Request) {
 
   newFormData.lb_campaign = {
     label: "Leadbyte Campaign",
-    value: toLeadByteCampaignBillable(formData.campaign.value, formData),
+    value: toLeadByteCampaignBillable(
+      safeValue(formData, "campaign"),
+      formData
+    ),
   };
 
   newFormData.lb_accepted_dba = {
@@ -345,17 +358,6 @@ export async function PUT(req: Request) {
     value: "Completed",
   };
 
-  // ✅ Only check rule if campaign !== justeat
-  if (
-    formData.campaign.value !== "justeat" &&
-    !isValidWorkStatus(newFormData)
-  ) {
-    return NextResponse.json(
-      { msg: "Invalid work status / dateleft combination" },
-      { status: 400 }
-    );
-  }
-
   try {
     const response = await fetch(process.env.ZAPIER_LEADTRANSFER_ENDPOINT!, {
       method: "POST",
@@ -368,13 +370,11 @@ export async function PUT(req: Request) {
     }
 
     const json = await response.json();
-    console.log("✅ Zapier call successful:", json);
 
     await server_marketing_tracking(
       formData,
       req.headers.get("x-real-ip") || "127.0.0.1"
     );
-    console.log("✅ Marketing tracking completed");
 
     const updatedRecord = await prisma.leadHistory.update({
       where: { id: checkdata.id },
@@ -384,18 +384,6 @@ export async function PUT(req: Request) {
         lead_sold_timestamp_txt: newFormData.lead_sold_timestamp.value,
         lead_sold_timestamp: date,
       },
-    });
-
-    const verification = await prisma.leadHistory.findUnique({
-      where: { id: checkdata.id },
-      select: { id: true, lead_status: true, lead_sold_timestamp: true },
-    });
-    await prisma.$disconnect();
-    await prisma.$connect();
-
-    const finalVerification = await prisma.leadHistory.findUnique({
-      where: { id: checkdata.id },
-      select: { id: true, lead_status: true },
     });
 
     return NextResponse.json({ msg: json.status }, { status: 200 });
@@ -415,7 +403,11 @@ export async function POST(req: Request) {
   const { formData } = await req.json();
   const date = new Date();
 
-  formData.timestamp = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")} - ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  formData.timestamp = `${date.getFullYear()}/${String(
+    date.getMonth() + 1
+  ).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")} - ${String(
+    date.getHours()
+  ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 
   formData.lead_sold_timestamp = {
     label: "Lead Sold Timestamp",
@@ -427,20 +419,16 @@ export async function POST(req: Request) {
     bitlyId = generateBitlyId();
   } while (!(await isBitlyIdUnique(prisma, bitlyId)));
 
-  if (formData.campaign.value !== "sainsburys") {
+  if (safeValue(formData, "campaign") !== "sainsburys") {
+    if (!formData.latest_step) formData.latest_step = {};
     formData.latest_step.value = "Final Step";
   }
 
-  formData.nurture_link = {
-    label: "Nurture Link",
-    value: `https://claim.fairpayforall.co.uk/${firstCharLower(formData.campaign.value)}/${bitlyId}`,
-  };
-
   const newlead = await prisma.leadHistory.create({
     data: {
-      lead_email: formData.email.value,
-      lead_name: formData.firstname.value,
-      lead_campaign: formData.campaign.value,
+      lead_email: safeValue(formData, "email"),
+      lead_name: safeValue(formData, "firstname"),
+      lead_campaign: safeValue(formData, "campaign"),
       formData: formData,
       lead_status: LeadStatus.nurture,
       lead_id: bitlyId,
@@ -449,20 +437,22 @@ export async function POST(req: Request) {
 
   formData.lb_campaign = {
     label: "Leadbyte Campaign",
-    value: toLeadByteCampaignNurture(formData.campaign.value),
+    value: toLeadByteCampaignNurture(safeValue(formData, "campaign")),
   };
+
+  const nurtureLinkId = newlead.lead_id;
+  const campaignChar = safeValue(formData, "campaign").charAt(0) ?? "";
+  const nurtureLinkCode = `https://claim.fairpayforall.co.uk/${campaignChar}/${nurtureLinkId}`;
 
   formData.uuid = newlead.id;
   formData.nurture_id = {
     label: "Nurture ID",
     value: newlead.id,
   };
-  console.log(formData, "neenwnwnwnw");
 
-  // ✅ Only check rule if campaign !== justeat
-  if (formData.campaign.value !== "justeat" && !isValidWorkStatus(formData)) {
+  if (!isEmploymentStatusValid(formData)) {
     return NextResponse.json(
-      { msg: "Invalid work status / dateleft combination" },
+      { msg: "Employment status and date left are inconsistent" },
       { status: 400 }
     );
   }
@@ -482,6 +472,64 @@ export async function POST(req: Request) {
 
   const json = await zapierResponse.json();
 
+  let leadbyteJson = {};
+
+  if (safeValue(formData, "campaign") === "sainsburys") {
+    const leadbytePayload = {
+      campid: "SAINS-API",
+      sid: "3",
+      email: safeValue(formData, "email"),
+      firstname: safeValue(formData, "firstname"),
+      lastname: safeValue(formData, "lastname"),
+      dob: safeValue(formData, "dob"),
+      full_address: safeValue(formData, "address"),
+      phone1: safeValue(formData, "telphone"),
+      gender: safeValue(formData, "gender"),
+      still_work_at_store: safeValue(formData, "still_work_at_store"),
+      accepted_dba: safeValue(formData, "accepted_dba"),
+      hourlyrate: safeValue(formData, "hourly_rate"),
+      storelocation: safeValue(formData, "storelocation"),
+      postcode: safeValue(formData, "postcode"),
+      utm_source: safeValue(formData, "utm_source"),
+      utm_medium: safeValue(formData, "utm_medium"),
+      utm_device: safeValue(formData, "utm_device"),
+      employee_number: safeValue(formData, "employee_number"),
+      marketing: safeValue(formData, "futuremarketing"),
+      ninumber: safeValue(formData, "ninumber"),
+      dateleft: safeValue(formData, "dateleft"),
+      utm_content: safeValue(formData, "utm_content"),
+      privacypolicy: safeValue(formData, "privacypolicy", "Yes"),
+      utm_campaign: safeValue(formData, "utm_campaign"),
+      utm_term: safeValue(formData, "utm_term"),
+      nurture_id: safeValue(formData, "nurture_id"),
+      device: safeValue(formData, "device"),
+      nurture_link: nurtureLinkCode,
+      expiry_date: safeValue(formData, "expiry_date"),
+      days_left: safeValue(formData, "days_left"),
+      latest_step: safeValue(formData, "latest_step"),
+      country: "United Kingdom",
+    };
+
+    const leadbyteResponse = await fetch(
+      "https://maddisonclarke.leadbyte.co.uk/restapi/v1.3/leads",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          X_KEY: process.env.LEADBYTE_API_KEY!,
+        },
+        body: JSON.stringify(leadbytePayload),
+      }
+    );
+
+    leadbyteJson = await leadbyteResponse.json();
+
+    if (!leadbyteResponse.ok) {
+      console.error("Leadbyte error:", leadbyteJson);
+      throw new Error("Failed to push lead to Leadbyte");
+    }
+  }
+
   await prisma.leadHistory.update({
     where: { id: newlead.id },
     data: {
@@ -495,7 +543,8 @@ export async function POST(req: Request) {
   return NextResponse.json(
     {
       lead_id: newlead.id,
-      msg: json.status,
+      msg: (json as any).status ?? null,
+      leadbyte: leadbyteJson,
     },
     { status: 200 }
   );

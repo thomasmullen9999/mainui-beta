@@ -290,7 +290,7 @@ export function MCAgreement({ formData, uuid, slug, agreements }: PropsArray) {
   }
   async function leadbillable(formData: any, uuid: string) {
     setIsSubmitting(true);
-    // console.log(formData, "formdata leadbillable", uuid, "uuid leadbillable");
+    console.log(formData, "formdata leadbillable", uuid, "uuid leadbillable");
     try {
       const response = await fetch(`/api/leadtransfer`, {
         method: "PUT",
@@ -302,7 +302,6 @@ export function MCAgreement({ formData, uuid, slug, agreements }: PropsArray) {
       });
 
       const data = await response.json();
-
       if (!response.ok) {
         // Throw an error with the response status
         setIsError(true);
@@ -322,13 +321,14 @@ export function MCAgreement({ formData, uuid, slug, agreements }: PropsArray) {
     }
   }
   async function leadbillableSainsburys(formData: any, uuid: string) {
+    console.log("leas billable sainos");
     if (!uuid) {
       throw new Error("UUID is undefined.");
     }
 
     setIsSubmitting(true);
 
-    // console.log(formData, "formdata leadbillable", uuid, "uuid leadbillable");
+    console.log(formData, "formdata leadbillable", uuid, "uuid leadbillable");
     try {
       const response = await fetch(`/api/leadtransfer`, {
         method: "PUT",
@@ -501,7 +501,7 @@ export function MCAgreement({ formData, uuid, slug, agreements }: PropsArray) {
 
   // update Prisma database with new values for still_work_at_store and dateleft
   const updateDatabase = async () => {
-    // console.log("updating db");
+    console.log("updating db");
     try {
       const response = await fetch(`/api/leadtransfer`, {
         method: "PUT",

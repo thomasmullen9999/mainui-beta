@@ -10,7 +10,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { calculateDayDistances } from "@/utils/main";
+import { calculateDayDistances, getLondonTime } from "@/utils/main";
 
 // Types
 interface Agreement {
@@ -62,6 +62,7 @@ type PropsArray = {
   slug: string;
   uuid?: string;
   agreements: any;
+  leadbyteId: any;
 };
 
 // Constants
@@ -89,6 +90,7 @@ export function SainsMCAgreement({
   uuid,
   slug,
   agreements,
+  leadbyteId,
 }: PropsArray) {
   // State
   const [state, setState] = useState({
@@ -109,6 +111,8 @@ export function SainsMCAgreement({
   });
 
   const [leadData, setLeadData] = useState<{ [key: string]: any }>({});
+
+  const apiKey = process.env.LEADBYTE_API_KEY;
 
   // Computed values
   const isMCDomain = state.domain?.includes("maddisonclarke");
@@ -300,6 +304,17 @@ export function SainsMCAgreement({
     shouldTrack: boolean = false
   ) => {
     setState((prev) => ({ ...prev, isSubmitting: true }));
+    formData.lead_sold_timestamp = {
+      label: "Lead Sold Timestamp",
+      value: getLondonTime(),
+    };
+
+    formData.lb_accepted_dba = {
+      label: "Accepted DBA",
+      value: "Yes",
+    };
+
+    console.log(formData, "new place check");
     try {
       const response = await fetch(`/api/leadtransfer`, {
         method: "PUT",
@@ -319,6 +334,35 @@ export function SainsMCAgreement({
         // Only send tracking if requested (for billable leads)
         if (shouldTrack) {
           sendTracking(formData);
+        }
+
+        // Inside updateLead function
+        try {
+          const leadByteResponse = await fetch("/api/updateleadbyte", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              leadbyteId,
+              leadData: {
+                accepted_dba: formData.lb_accepted_dba?.value ?? "Yes",
+                lh_timestamp: formData.lead_sold_timestamp?.value || "",
+              },
+              zapierData: {
+                first_name: formData.firstname?.value,
+                last_name: formData.lastname?.value,
+                email: formData.email?.value,
+                gender: formData.gender?.value,
+                employee_number: formData.employee_number?.value,
+                accepted_dba: formData.lb_accepted_dba?.value ?? "Yes",
+                lh_timestamp: formData.lead_sold_timestamp?.value || "",
+              },
+            }),
+          });
+
+          const leadByteResult = await leadByteResponse.json();
+          console.log("LeadByte API result:", leadByteResult);
+        } catch (apiError) {
+          console.error("Error calling LeadByte API:", apiError);
         }
 
         // 🔥 New API call to update lead status to "sold"
