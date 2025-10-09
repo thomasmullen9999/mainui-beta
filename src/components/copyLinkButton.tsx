@@ -92,7 +92,7 @@ export default function CopyLinkButton({
   const handleClick = () => {
     const firstLetter = campaign?.charAt(0).toLowerCase() || "";
     // const url = `https://claim.fairpayforall.co.uk/${firstLetter}/${leadId ?? ""}`;
-    const url = `https://claim.fairpayforall.co.uk/${firstLetter}/${leadId ?? ""}`;
+    const url = `https://mainui-beta.vercel.app/${firstLetter}/${leadId ?? ""}`;
 
     navigator.clipboard.writeText(url);
   };
