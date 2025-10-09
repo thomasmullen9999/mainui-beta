@@ -728,72 +728,110 @@ function App({ params }: { params: { slug: string[] } }) {
     });
   };
 
-  const sendNurtureLead = async () => {
-    let expiryDate = "";
-    let daysLeft;
-    if (formData.still_work_at_store.value === "No") {
-      expiryDate = addDaysToDate(
-        formData.dateleft.value,
-        campaignExpiryValues[formData.campaign.value as CampaignKey]
-      );
-      daysLeft = daysUntil(expiryDate);
-    }
+  async function sendNurtureLead(formData: any) {
+    console.log("🚀 sendNurtureLead called with:", formData);
 
-    formData.expiry_date = {
-      label: "Expiry Date",
-      value: expiryDate,
-    };
-
-    formData.days_left = {
-      label: "Days Left",
-      value: daysLeft,
-    };
-
-    formData.leadbyte_id = {
-      label: "Leadbyte ID",
-      value: "",
-    };
     setIsSubmitting(true);
 
-    console.log(formData, "hyuhyuuu");
-
     try {
+      console.log("📡 Sending POST to /api/leadtransfer...");
+
       const response = await fetch("/api/leadtransfer", {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ formData }),
       });
 
-      const data = await response.json();
+      console.log(
+        "📬 Response received:",
+        response.status,
+        response.statusText
+      );
 
-      console.log(data, "data from lead transfer");
-      // move to next step only after we have data (but don't cause loops)
-      if (data) {
-        setLeadUUID(data.lead_id);
-        setLeadbyteID(data.leadbyte.records[0].response.leadId);
-        formData.leadbyte_id.value = data.leadbyte.records[0].response.leadId;
-        try {
-          const response = await fetch("/api/sendleadbyteid", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ leadUUID: data.lead_id, formData }),
-          });
-
-          const result = await response.json();
-          console.log("Updated lead:", result);
-        } catch (error) {
-          console.error("Error updating lead:", error);
-        }
-        // Only advance if currentStep hasn't already changed elsewhere
-        setCurrentStep((s) => s + 1);
+      if (!response.ok) {
+        const text = await response.text();
+        console.error(
+          "❌ Server returned non-OK status:",
+          response.status,
+          text
+        );
+        throw new Error(`Server error ${response.status}`);
       }
-      setIsSubmitting(false);
-    } catch (e) {
-      setIsSubmitting(false);
+
+      console.log("🧩 Parsing JSON response...");
+      const data = await response.json();
+      console.log("✅ Parsed response JSON:", data);
+
+      if (data.success) {
+        console.log("🎉 Lead successfully sent!");
+        toast.success("Lead successfully sent!");
+
+        // ✅ Update leadUUID
+        if (data.lead_id) {
+          setLeadUUID(data.lead_id);
+        }
+
+        // ✅ Update leadbyte ID if available
+        if (data.sainsLeadbyte?.records?.[0]?.response?.leadId) {
+          const leadbyteId = data.sainsLeadbyte.records[0].response.leadId;
+
+          setLeadbyteID(leadbyteId);
+          console.log(leadbyteId, "does it xists?");
+
+          // Update formData with leadbyte_id
+          setFormData((prev) => ({
+            ...prev,
+            leadbyte_id: {
+              label: "Leadbyte ID",
+              value: leadbyteId,
+            },
+          }));
+
+          // ✅ Send leadbyte ID to backend
+          try {
+            console.log("📤 Sending leadbyte ID to /api/sendleadbyteid...");
+            const updateResponse = await fetch("/api/sendleadbyteid", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                leadUUID: data.lead_id,
+                formData: {
+                  ...formData,
+                  leadbyte_id: { label: "Leadbyte ID", value: leadbyteId },
+                },
+              }),
+            });
+
+            const updateResult = await updateResponse.json();
+            console.log("✅ Updated lead with leadbyte ID:", updateResult);
+          } catch (updateError) {
+            console.error(
+              "⚠️ Error updating lead with leadbyte ID:",
+              updateError
+            );
+            // Don't throw - this is a secondary operation
+          }
+        }
+
+        // ✅ Move to next step
+        setCurrentStep((prev) => prev + 1);
+      } else {
+        console.warn("⚠️ Lead transfer failed:", data.message);
+        toast.error(
+          "Lead transfer failed: " + (data.message || "Unknown error")
+        );
+      }
+    } catch (err: any) {
+      console.error("🔥 sendNurtureLead caught error:", err);
       toast.error("Internet connection Error, please retry later.");
+    } finally {
+      console.log("🔚 Finished sendNurtureLead, resetting state...");
+      setIsSubmitting(false);
     }
-  };
+  }
 
   const handleNextButtonClick = () => {
     console.log(configData, "configData");
@@ -1113,7 +1151,7 @@ function App({ params }: { params: { slug: string[] } }) {
             <Button
               id="MCnextBtn"
               className="MCnextbtn mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md border border-gray-200 px-8 text-sm font-medium shadow-sm"
-              onClick={sendNurtureLead}
+              onClick={() => sendNurtureLead(formData)} // ✅ wrap it in arrow function
               disabled={
                 isSubmitting ||
                 !formData["telphone"]?.value?.trim() ||

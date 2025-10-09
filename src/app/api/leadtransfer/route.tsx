@@ -280,56 +280,97 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: Request) {
-  const { formData, lead_id } = await req.json();
+  console.log("🔥 [PUT] /api/leadtransfer called");
+
+  let body;
+  try {
+    body = await req.json();
+  } catch (err) {
+    console.error("❌ Invalid JSON payload:", err);
+    return NextResponse.json(
+      { success: false, msg: "Invalid JSON in request body" },
+      { status: 400 }
+    );
+  }
+
+  const { formData, lead_id } = body || {};
+  if (!formData || !lead_id) {
+    console.error("❌ Missing formData or lead_id", { formData, lead_id });
+    return NextResponse.json(
+      { success: false, msg: "Missing formData or lead_id" },
+      { status: 400 }
+    );
+  }
+
+  console.log("📦 lead_id:", lead_id);
+
   const date = new Date();
 
   let checkdata;
-
-  if (String(lead_id).length === 5) {
-    checkdata = await prisma.leadHistory.findFirst({
-      where: { lead_id: lead_id },
-    });
-  } else {
-    checkdata = await prisma.leadHistory.findUnique({
-      where: { id: lead_id },
-    });
+  try {
+    if (String(lead_id).length === 5) {
+      checkdata = await prisma.leadHistory.findFirst({ where: { lead_id } });
+    } else {
+      checkdata = await prisma.leadHistory.findUnique({
+        where: { id: lead_id },
+      });
+    }
+  } catch (err) {
+    console.error("❌ Prisma lookup error:", err);
+    return NextResponse.json(
+      { success: false, msg: "Database lookup failed" },
+      { status: 500 }
+    );
   }
 
   if (!checkdata) {
-    return NextResponse.json({ msg: "Data Not Found" }, { status: 400 });
+    console.warn("⚠️ No record found for", lead_id);
+    return NextResponse.json(
+      { success: false, msg: "Lead not found" },
+      { status: 404 }
+    );
   }
 
+  console.log("✅ Found lead:", {
+    id: checkdata.id,
+    campaign: checkdata.lead_campaign,
+    status: checkdata.lead_status,
+  });
+
   if (checkdata.lead_status !== LeadStatus.nurture) {
+    console.warn("⚠️ Lead not in nurture state, skipping update");
     return NextResponse.json(
-      { msg: "Lead is not in nurture" },
+      { success: false, msg: "Lead is not in nurture state" },
       { status: 400 }
     );
   }
 
-  let newFormData: any = formData;
-
-  if (!validationFunction({ ...checkdata, formData: newFormData })) {
-    return NextResponse.json({ msg: "Invalid Data" }, { status: 400 });
+  // --- Validation ---
+  const validData = validationFunction({ ...checkdata, formData });
+  if (!validData) {
+    console.warn("⚠️ Validation failed for lead:", lead_id);
+    return NextResponse.json(
+      { success: false, msg: "Invalid lead data" },
+      { status: 400 }
+    );
   }
 
   if (!isEmploymentStatusValid(formData)) {
+    console.warn("⚠️ Employment status invalid for", lead_id);
     return NextResponse.json(
-      { msg: "Employment status and date left are inconsistent" },
+      {
+        success: false,
+        msg: "Employment status and date left are inconsistent",
+      },
       { status: 400 }
     );
   }
 
-  if (formData?.new_still_work_at_store)
-    newFormData.still_work_at_store = {
-      value: safeValue(formData, "new_still_work_at_store"),
-    };
-  if (formData?.new_dateleft)
-    newFormData.dateleft = { value: safeValue(formData, "new_dateleft") };
-  if (formData?.new_LastDelivery)
-    newFormData.LastDelivery = {
-      value: safeValue(formData, "new_LastDelivery"),
-    };
+  console.log("🧩 Validation passed, preparing new formData...");
 
+  const newFormData: any = { ...formData };
+
+  // update derived fields
   newFormData.lead_sold_timestamp = {
     label: "Lead Sold Timestamp",
     value: getLondonTime(),
@@ -343,186 +384,265 @@ export async function PUT(req: Request) {
     ),
   };
 
-  newFormData.lb_accepted_dba = {
-    label: "Accepted DBA",
-    value: "Yes",
-  };
+  newFormData.lb_accepted_dba = { label: "Accepted DBA", value: "Yes" };
+  newFormData.lead_status = { label: "Lead Status", value: "sold" };
+  newFormData.latest_step = { label: "Latest Step", value: "Completed" };
 
-  newFormData.lead_status = {
-    label: "Lead Status",
-    value: "sold",
-  };
-
-  newFormData.latest_step = {
-    label: "Latest Step",
-    value: "Completed",
-  };
-
+  console.log("📤 Updating to sold...");
   try {
-    const response = await fetch(process.env.ZAPIER_LEADTRANSFER_ENDPOINT!, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newFormData),
-    });
+    const internalRes = await fetch(
+      `${process.env.BASE_URL}/api/updatetosold`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newFormData),
+      }
+    );
 
-    if (!response.ok) {
-      throw new Error(`Zapier API failed with status: ${response.status}`);
-    }
+    const internalText = await internalRes.text();
+    console.log("📬 Internal API response:", internalRes.status, internalText);
 
-    const json = await response.json();
+    if (!internalRes.ok)
+      throw new Error(`Internal API failed: ${internalRes.status}`);
 
+    // Continue with your tracking
     await server_marketing_tracking(
       formData,
       req.headers.get("x-real-ip") || "127.0.0.1"
     );
 
-    const updatedRecord = await prisma.leadHistory.update({
+    // Update database
+    const updated = await prisma.leadHistory.update({
       where: { id: checkdata.id },
       data: {
-        formData: newFormData ?? Prisma.JsonNull,
+        formData: newFormData,
         lead_status: LeadStatus.sold,
         lead_sold_timestamp_txt: newFormData.lead_sold_timestamp.value,
         lead_sold_timestamp: date,
       },
     });
 
-    return NextResponse.json({ msg: json.status }, { status: 200 });
-  } catch (error) {
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { msg: `Operation failed: ${error.message}` },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ msg: "Internal server error" }, { status: 500 });
+    console.log("✅ Lead successfully updated:", updated.id);
+    return NextResponse.json(
+      { success: true, msg: "Lead successfully updated" },
+      { status: 200 }
+    );
+  } catch (err: any) {
+    console.error("🔥 PUT /leadtransfer error:", err);
+    return NextResponse.json(
+      { success: false, msg: err.message || "Lead update failed" },
+      { status: 500 }
+    );
   }
 }
 
+function extractStreet1(address: string | undefined): string {
+  if (!address) return "";
+  const parts = address.split(",").map((s) => s.trim());
+  return parts[0] || "";
+}
+
 export async function POST(req: Request) {
-  const { formData } = await req.json();
-  const date = new Date();
+  try {
+    const { formData } = await req.json();
+    const date = new Date();
 
-  formData.timestamp = `${date.getFullYear()}/${String(
-    date.getMonth() + 1
-  ).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")} - ${String(
-    date.getHours()
-  ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    formData.timestamp = `${date.getFullYear()}/${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")} - ${String(
+      date.getHours()
+    ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 
-  formData.lead_sold_timestamp = {
-    label: "Lead Sold Timestamp",
-    value: "",
-  };
+    formData.lead_sold_timestamp = {
+      label: "Lead Sold Timestamp",
+      value: "",
+    };
 
-  let bitlyId;
-  do {
-    bitlyId = generateBitlyId();
-  } while (!(await isBitlyIdUnique(prisma, bitlyId)));
+    let bitlyId;
+    do {
+      bitlyId = generateBitlyId();
+    } while (!(await isBitlyIdUnique(prisma, bitlyId)));
 
-  if (safeValue(formData, "campaign") !== "sainsburys") {
-    if (!formData.latest_step) formData.latest_step = {};
-    formData.latest_step.value = "Final Step";
-  }
-
-  const newlead = await prisma.leadHistory.create({
-    data: {
-      lead_email: safeValue(formData, "email"),
-      lead_name: safeValue(formData, "firstname"),
-      lead_campaign: safeValue(formData, "campaign"),
-      formData: formData,
-      lead_status: LeadStatus.nurture,
-      lead_id: bitlyId,
-    },
-  });
-
-  formData.lb_campaign = {
-    label: "Leadbyte Campaign",
-    value: toLeadByteCampaignNurture(safeValue(formData, "campaign")),
-  };
-
-  const nurtureLinkId = newlead.lead_id;
-  const campaignChar = safeValue(formData, "campaign").charAt(0) ?? "";
-  const nurtureLinkCode = `https://claim.fairpayforall.co.uk/${campaignChar}/${nurtureLinkId}`;
-
-  formData.uuid = newlead.id;
-  formData.nurture_id = {
-    label: "Nurture ID",
-    value: newlead.id,
-  };
-
-  if (!isEmploymentStatusValid(formData)) {
-    return NextResponse.json(
-      { msg: "Employment status and date left are inconsistent" },
-      { status: 400 }
-    );
-  }
-
-  /*   const zapierResponse = await fetch(
-    process.env.ZAPIER_LEADTRANSFER_ENDPOINT!,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
+    if (safeValue(formData, "campaign") !== "sainsburys") {
+      if (!formData.latest_step) formData.latest_step = {};
+      formData.latest_step.value = "Final Step";
     }
-  );
 
-  if (!zapierResponse.ok) {
-    throw new Error("Failed to push lead to Zapier");
-  }
+    const newlead = await prisma.leadHistory.create({
+      data: {
+        lead_email: safeValue(formData, "email"),
+        lead_name: safeValue(formData, "firstname"),
+        lead_campaign: safeValue(formData, "campaign"),
+        formData: formData,
+        lead_status: LeadStatus.nurture,
+        lead_id: bitlyId,
+      },
+    });
 
-  const json = await zapierResponse.json(); */
+    formData.lb_campaign = {
+      label: "Leadbyte Campaign",
+      value: toLeadByteCampaignNurture(safeValue(formData, "campaign")),
+    };
 
-  const nurtureCampaignNames = {
-    sainsburys: "SAINS-NUR",
-    next: "NEXT-NUR",
-    morrisons: "FP4A",
-    asda: "ASDA-NUR",
-    coop: "COOP-NUR",
-    bolt: "BOLT-NUR",
-    justeat: "JUSTEAT-NUR",
-  };
+    const nurtureLinkId = newlead.lead_id;
+    const campaignChar = safeValue(formData, "campaign").charAt(0) ?? "";
+    const nurtureLinkCode = `https://claim.fairpayforall.co.uk/${campaignChar}/${nurtureLinkId}`;
 
-  type CampaignKey = keyof typeof nurtureCampaignNames;
+    formData.uuid = newlead.id;
+    formData.nurture_id = {
+      label: "Nurture ID",
+      value: newlead.id,
+    };
 
-  const campid =
-    nurtureCampaignNames[formData.campaign.value as CampaignKey] || "TEST-NUR";
+    if (!isEmploymentStatusValid(formData)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Employment status and date left are inconsistent",
+        },
+        { status: 400 }
+      );
+    }
 
-  let sainsLeadbyteJson = {};
+    const nurtureCampaignNames = {
+      sainsburys: "SAINS-NUR",
+      next: "NEXT-NUR",
+      morrisons: "FP4A",
+      asda: "ASDA-NUR",
+      coop: "COOP-NUR",
+      bolt: "BOLT-NUR",
+      justeat: "JUSTEAT-NUR",
+    };
 
-  if (safeValue(formData, "campaign") === "sainsburys") {
+    type CampaignKey = keyof typeof nurtureCampaignNames;
+
+    const campid =
+      nurtureCampaignNames[formData.campaign.value as CampaignKey] ||
+      "TEST-NUR";
+
+    let sainsLeadbyteJson = {};
+
+    if (safeValue(formData, "campaign") === "sainsburys") {
+      const leadbytePayload = {
+        campid: "SAINS-API",
+        sid: "3",
+        email: safeValue(formData, "email"),
+        firstname: safeValue(formData, "firstname"),
+        lastname: safeValue(formData, "lastname"),
+        dob: safeValue(formData, "dob"),
+        full_address: safeValue(formData, "address"),
+        phone1: safeValue(formData, "telphone"),
+        gender: safeValue(formData, "gender"),
+        still_work_at_store: safeValue(formData, "still_work_at_store"),
+        accepted_dba: safeValue(formData, "accepted_dba"),
+        hourlyrate: safeValue(formData, "hourly_rate"),
+        storelocation: safeValue(formData, "storelocation"),
+        postcode: safeValue(formData, "postcode"),
+        utm_source: safeValue(formData, "utm_source"),
+        utm_medium: safeValue(formData, "utm_medium"),
+        utm_device: safeValue(formData, "utm_device"),
+        employee_number: safeValue(formData, "employee_number"),
+        marketing: safeValue(formData, "futuremarketing"),
+        ninumber: safeValue(formData, "ninumber"),
+        dateleft: safeValue(formData, "dateleft"),
+        utm_content: safeValue(formData, "utm_content"),
+        privacypolicy: safeValue(formData, "privacypolicy", "Yes"),
+        utm_campaign: safeValue(formData, "utm_campaign"),
+        utm_term: safeValue(formData, "utm_term"),
+        nurture_id: safeValue(formData, "nurture_id"),
+        device: safeValue(formData, "device"),
+        nurture_link: nurtureLinkCode,
+        expiry_date: safeValue(formData, "expiry_date"),
+        days_left: safeValue(formData, "days_left"),
+        latest_step: safeValue(formData, "latest_step"),
+        country: "United Kingdom",
+      };
+
+      const leadbyteResponse = await fetch(
+        "https://maddisonclarke.leadbyte.co.uk/restapi/v1.3/leads",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            X_KEY: process.env.LEADBYTE_API_KEY!,
+          },
+          body: JSON.stringify(leadbytePayload),
+        }
+      );
+
+      sainsLeadbyteJson = await leadbyteResponse.json();
+      console.log(sainsLeadbyteJson, "beta one");
+
+      if (!leadbyteResponse.ok) {
+        console.error("Leadbyte error:", sainsLeadbyteJson);
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Failed to push lead to Leadbyte (Sainsburys)",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    let leadbyteJson = {};
+
+    const fv = (key: string) => formData?.[key]?.value ?? "";
+
+    const addressValue = fv("address");
+    const street1Value = fv("street1") || extractStreet1(addressValue);
+
     const leadbytePayload = {
-      campid: "SAINS-API",
+      campid: campid ?? "",
       sid: "3",
-      email: safeValue(formData, "email"),
-      firstname: safeValue(formData, "firstname"),
-      lastname: safeValue(formData, "lastname"),
-      dob: safeValue(formData, "dob"),
-      full_address: safeValue(formData, "address"),
-      phone1: safeValue(formData, "telphone"),
-      gender: safeValue(formData, "gender"),
-      still_work_at_store: safeValue(formData, "still_work_at_store"),
-      accepted_dba: safeValue(formData, "accepted_dba"),
-      hourlyrate: safeValue(formData, "hourly_rate"),
-      storelocation: safeValue(formData, "storelocation"),
-      postcode: safeValue(formData, "postcode"),
-      utm_source: safeValue(formData, "utm_source"),
-      utm_medium: safeValue(formData, "utm_medium"),
-      utm_device: safeValue(formData, "utm_device"),
-      employee_number: safeValue(formData, "employee_number"),
-      marketing: safeValue(formData, "futuremarketing"),
-      ninumber: safeValue(formData, "ninumber"),
-      dateleft: safeValue(formData, "dateleft"),
-      utm_content: safeValue(formData, "utm_content"),
-      privacypolicy: safeValue(formData, "privacypolicy", "Yes"),
-      utm_campaign: safeValue(formData, "utm_campaign"),
-      utm_term: safeValue(formData, "utm_term"),
-      nurture_id: safeValue(formData, "nurture_id"),
-      device: safeValue(formData, "device"),
-      nurture_link: nurtureLinkCode,
-      expiry_date: safeValue(formData, "expiry_date"),
-      days_left: safeValue(formData, "days_left"),
-      latest_step: safeValue(formData, "latest_step"),
-      country: "United Kingdom",
+
+      // 🔹 Core info
+      email: fv("email"),
+      firstname: fv("firstname"),
+      lastname: fv("lastname"),
+      dob: fv("dob"),
+      gender: fv("gender"),
+
+      // 🔹 Contact / address info
+      phone1: fv("telphone"),
+      full_address: addressValue,
+      street1: addressValue,
+      street2: fv("street2"),
+      towncity: fv("towncity"),
+      county: fv("county"),
+      postcode: fv("postcode"),
+      country: fv("country") || "United Kingdom",
+
+      // 🔹 Work info
+      storelocation: fv("storelocation"),
+      still_work_at_store: fv("still_work_at_store"),
+      accepted_dba: fv("accepted_dba"),
+      hourlyrate: fv("hourly_rate"),
+      employee_number: fv("employee_number"),
+      ninumber: fv("ninumber"),
+      dateleft: fv("dateleft"),
+
+      // 🔹 UTM / marketing info
+      utm_source: fv("utm_source"),
+      utm_medium: fv("utm_medium"),
+      utm_device: fv("utm_device"),
+      utm_content: fv("utm_content"),
+      utm_campaign: fv("utm_campaign"),
+      utm_term: fv("utm_term"),
+      marketing: fv("futuremarketing"),
+      privacypolicy: fv("privacypolicy") || "Yes",
+
+      // 🔹 Device / tracking info
+      nurture_id: fv("nurture_id"),
+      device: fv("device"),
+      nurture_link:
+        fv("nurture_link") ||
+        `https://claim.fairpayforall.co.uk/${formData?.campaign?.value?.charAt(0)?.toLowerCase() ?? ""}/${nurtureLinkId}`,
+
+      // 🔹 Timing / expiry
+      expiry_date: fv("expiry_date"),
+      days_left: fv("days_left"),
+      latest_step: fv("latest_step"),
     };
 
     const leadbyteResponse = await fetch(
@@ -537,116 +657,51 @@ export async function POST(req: Request) {
       }
     );
 
-    sainsLeadbyteJson = await leadbyteResponse.json();
+    leadbyteJson = await leadbyteResponse.json();
+
+    console.log(leadbyteJson, "leadbyte");
 
     if (!leadbyteResponse.ok) {
-      console.error("Leadbyte error:", sainsLeadbyteJson);
-      throw new Error("Failed to push lead to Leadbyte");
+      console.error("Leadbyte error:", leadbyteJson);
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Failed to push lead to Leadbyte",
+        },
+        { status: 500 }
+      );
     }
-  }
 
-  let leadbyteJson = {};
-  function extractStreet1(address: string | undefined): string {
-    if (!address) return "";
-    const parts = address.split(",").map((s) => s.trim());
-    return parts[0] || "";
-  }
-
-  const fv = (key: string) => formData?.[key]?.value ?? "";
-
-  const addressValue = fv("address");
-  const street1Value = fv("street1") || extractStreet1(addressValue);
-
-  const leadbytePayload = {
-    campid: campid ?? "",
-    sid: "3",
-
-    // 🔹 Core info
-    email: fv("email"),
-    firstname: fv("firstname"),
-    lastname: fv("lastname"),
-    dob: fv("dob"),
-    gender: fv("gender"),
-
-    // 🔹 Contact / address info
-    phone1: fv("telphone"),
-    full_address: addressValue,
-    street1: addressValue,
-    street2: fv("street2"),
-    towncity: fv("towncity"),
-    county: fv("county"),
-    postcode: fv("postcode"),
-    country: fv("country") || "United Kingdom",
-
-    // 🔹 Work info
-    storelocation: fv("storelocation"),
-    still_work_at_store: fv("still_work_at_store"),
-    accepted_dba: fv("accepted_dba"),
-    hourlyrate: fv("hourly_rate"),
-    employee_number: fv("employee_number"),
-    ninumber: fv("ninumber"),
-    dateleft: fv("dateleft"),
-
-    // 🔹 UTM / marketing info
-    utm_source: fv("utm_source"),
-    utm_medium: fv("utm_medium"),
-    utm_device: fv("utm_device"),
-    utm_content: fv("utm_content"),
-    utm_campaign: fv("utm_campaign"),
-    utm_term: fv("utm_term"),
-    marketing: fv("futuremarketing"),
-    privacypolicy: fv("privacypolicy") || "Yes",
-
-    // 🔹 Device / tracking info
-    nurture_id: fv("nurture_id"),
-    device: fv("device"),
-    nurture_link:
-      fv("nurture_link") ||
-      `https://claim.fairpayforall.co.uk/${formData?.campaign?.value?.charAt(0)?.toLowerCase() ?? ""}/${nurtureLinkId}`,
-
-    // 🔹 Timing / expiry
-    expiry_date: fv("expiry_date"),
-    days_left: fv("days_left"),
-    latest_step: fv("latest_step"),
-  };
-
-  const leadbyteResponse = await fetch(
-    "https://maddisonclarke.leadbyte.co.uk/restapi/v1.3/leads",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        X_KEY: process.env.LEADBYTE_API_KEY!,
+    await prisma.leadHistory.update({
+      where: { id: newlead.id },
+      data: {
+        jsonData: leadbyteJson,
+        lead_status: newlead.lead_status ?? LeadStatus.nurture,
       },
-      body: JSON.stringify(leadbytePayload),
-    }
-  );
+    });
 
-  leadbyteJson = await leadbyteResponse.json();
+    revalidatePath("/admin");
 
-  console.log(leadbyteJson, "leadbye");
-
-  if (!leadbyteResponse.ok) {
-    console.error("Leadbyte error:", leadbyteJson);
-    throw new Error("Failed to push lead to Leadbyte");
+    // ✅ FIXED: Return success property that frontend expects
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Lead successfully transferred",
+        lead_id: newlead.id,
+        leadbyte_status: (leadbyteJson as any).status ?? null,
+        leadbyte: leadbyteJson,
+        sainsLeadbyte: sainsLeadbyteJson,
+      },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("🔥 POST /leadtransfer error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: error.message || "Failed to transfer lead",
+      },
+      { status: 500 }
+    );
   }
-
-  await prisma.leadHistory.update({
-    where: { id: newlead.id },
-    data: {
-      jsonData: leadbyteJson,
-      lead_status: newlead.lead_status ?? LeadStatus.nurture,
-    },
-  });
-
-  revalidatePath("/admin");
-
-  return NextResponse.json(
-    {
-      lead_id: newlead.id,
-      msg: (leadbyteJson as any).status ?? null,
-      leadbyte: leadbyteJson,
-    },
-    { status: 200 }
-  );
 }

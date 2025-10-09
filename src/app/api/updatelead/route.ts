@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       if (!apiKey) throw new Error("Missing LeadByte API key");
 
       const { street1, towncity, county, postcode } = parseAddress(
-        formData.address.value
+        formData.address?.value ?? "" // ✅ Add optional chaining here too
       );
 
       console.log(leadbyteId);
@@ -109,14 +109,13 @@ export async function POST(request: NextRequest) {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            apikey: apiKey, // guaranteed string
+            apikey: apiKey,
           },
           body: JSON.stringify({
             key: apiKey,
             leads: [
               {
-                // id: updatedLead.id.toString(),
-                id: leadbyteId || formData.leadbyte_id.value,
+                id: leadbyteId || formData.leadbyte_id?.value,
                 update: {
                   dob: formData.dob?.value ?? "",
                   gender: formData.gender?.value ?? "",
@@ -129,7 +128,7 @@ export async function POST(request: NextRequest) {
                   postcode: postcode ?? "",
                   accepted_dba: formData.accepted_dba?.value ?? "",
                   full_address: formData.address?.value ?? "",
-                  latest_step: formData.latest_step.value ?? "",
+                  latest_step: formData.latest_step?.value ?? "",
                 },
               },
             ],
