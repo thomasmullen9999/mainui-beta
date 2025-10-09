@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Helper to calculate days left
 function daysLeft(targetDateStr: string) {
   const targetDate = new Date(targetDateStr);
   const today = new Date();
@@ -12,12 +13,30 @@ function daysLeft(targetDateStr: string) {
   return Math.floor(diffMs / (1000 * 60 * 60 * 24));
 }
 
+// Type definition for formData
+type FormData = {
+  [key: string]: { value: any } | undefined;
+  days_left?: { value: number; [key: string]: any };
+};
+
+// Type for lead updates
 type LeadUpdate = {
   dbId: string;
   leadbyteId: string;
   newDaysLeft: number;
-  formData: Record<string, any>;
+  formData: FormData;
 };
+
+// Utility function to safely update days_left.value
+function updateDaysLeft(formData: FormData, newDaysLeft: number): FormData {
+  return {
+    ...formData, // preserve all existing fields
+    days_left: {
+      ...(formData.days_left || {}), // preserve subfields
+      value: newDaysLeft, // only update value
+    },
+  };
+}
 
 export async function GET() {
   try {
@@ -33,7 +52,7 @@ export async function GET() {
 
     const leadsToUpdate: LeadUpdate[] = allLeads
       .map((lead): LeadUpdate | null => {
-        const formData = lead.formData as Record<string, any> | undefined;
+        const formData = lead.formData as FormData | undefined;
         if (!formData || typeof formData !== "object") return null;
 
         const leadbyteId = formData["leadbyte_id"]?.value;
@@ -66,13 +85,7 @@ export async function GET() {
         prisma.leadHistory.update({
           where: { id: lead.dbId },
           data: {
-            formData: {
-              ...lead.formData, // preserve all existing fields
-              days_left: {
-                ...(lead.formData.days_left || {}), // preserve existing subfields
-                value: lead.newDaysLeft, // only update value
-              },
-            },
+            formData: updateDaysLeft(lead.formData, lead.newDaysLeft),
           },
         })
       )
@@ -98,7 +111,7 @@ export async function GET() {
                 leads: [
                   {
                     id: lead.leadbyteId,
-                    update: { days_left: lead.newDaysLeft + 1 },
+                    update: { days_left: lead.newDaysLeft },
                   },
                 ],
               }),
