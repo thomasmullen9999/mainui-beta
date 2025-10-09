@@ -13,11 +13,13 @@ function daysLeft(targetDateStr: string) {
   return Math.floor(diffMs / (1000 * 60 * 60 * 24));
 }
 
+// Type definition for formData
 type FormData = {
   [key: string]: { value: any } | undefined;
   days_left?: { value: number; [key: string]: any };
 };
 
+// Type for lead updates
 type LeadUpdate = {
   dbId: string;
   leadbyteId: string;
@@ -25,36 +27,41 @@ type LeadUpdate = {
   formData: FormData;
 };
 
+// Utility function to safely update days_left.value
 function updateDaysLeft(formData: FormData, newDaysLeft: number): FormData {
   return {
-    ...formData,
+    ...formData, // preserve all existing fields
     days_left: {
-      ...(formData.days_left || {}),
-      value: newDaysLeft,
+      ...(formData.days_left || {}), // preserve subfields
+      value: newDaysLeft, // only update value
     },
   };
 }
 
 export async function GET() {
+  const debugLogs: string[] = [];
+
   try {
     const apiKey = process.env.LEADBYTE_API_KEY;
     if (!apiKey) {
-      console.log("Missing LeadByte API key");
+      debugLogs.push("Missing LeadByte API key");
       return NextResponse.json(
-        { error: "Missing LeadByte API key" },
+        { error: "Missing LeadByte API key", debugLogs },
         { status: 500 }
       );
     }
 
     const allLeads = await prisma.leadHistory.findMany();
-    console.log(`Total leads fetched from DB: ${allLeads.length}`);
+    debugLogs.push(`Total leads fetched from DB: ${allLeads.length}`);
 
     const leadsToUpdate: LeadUpdate[] = allLeads
       .map((lead) => {
         const formData = lead.formData as FormData | undefined;
 
         if (!formData || typeof formData !== "object") {
-          console.log(`Skipping lead ${lead.id}: invalid or missing formData`);
+          debugLogs.push(
+            `Skipping lead ${lead.id}: invalid or missing formData`
+          );
           return null;
         }
 
@@ -62,14 +69,14 @@ export async function GET() {
         const expiryDate = formData["expiry_date"]?.value;
 
         if (!leadbyteId || !expiryDate) {
-          console.log(
+          debugLogs.push(
             `Skipping lead ${lead.id}: missing leadbyte_id or expiry_date`
           );
           return null;
         }
 
         const newDaysLeft = daysLeft(expiryDate);
-        console.log(
+        debugLogs.push(
           `Lead ${lead.id} -> leadbyteId: ${leadbyteId}, expiryDate: ${expiryDate}, daysLeft: ${newDaysLeft}`
         );
 
@@ -82,19 +89,22 @@ export async function GET() {
       })
       .filter((lead): lead is LeadUpdate => lead !== null);
 
-    console.log(`Leads to update after filtering: ${leadsToUpdate.length}`);
+    debugLogs.push(`Leads to update after filtering: ${leadsToUpdate.length}`);
 
     if (leadsToUpdate.length === 0) {
       return NextResponse.json({
         success: true,
         message: "No leads to update",
         leadsToUpdate: [],
+        debugLogs,
       });
     }
 
     // 1. Update local DB safely
     for (const lead of leadsToUpdate) {
-      console.log(`Updating DB for lead ${lead.dbId} with daysLeft ${lead.newDaysLeft}`);
+      debugLogs.push(
+        `Updating DB for lead ${lead.dbId} with daysLeft ${lead.newDaysLeft}`
+      );
       await prisma.leadHistory.update({
         where: { id: lead.dbId },
         data: {
@@ -105,7 +115,7 @@ export async function GET() {
 
     // Separate expired leads
     const expiredLeads = leadsToUpdate.filter((lead) => lead.newDaysLeft < 0);
-    console.log(`Expired leads: ${expiredLeads.length}`);
+    debugLogs.push(`Expired leads: ${expiredLeads.length}`);
 
     // 2. Update LeadByte — one request per lead
     const leadbyteResponses = await Promise.all(
@@ -131,10 +141,18 @@ export async function GET() {
             }
           );
           const json = await res.json();
-          console.log(`LeadByte updated lead ${lead.leadbyteId}:`, json);
-          return { leadId: lead.leadbyteId, status: res.status, response: json };
+          debugLogs.push(
+            `LeadByte updated lead ${lead.leadbyteId}: ${JSON.stringify(json)}`
+          );
+          return {
+            leadId: lead.leadbyteId,
+            status: res.status,
+            response: json,
+          };
         } catch (err) {
-          console.log(`LeadByte update failed for lead ${lead.leadbyteId}:`, err);
+          debugLogs.push(
+            `LeadByte update failed for lead ${lead.leadbyteId}: ${String(err)}`
+          );
           return {
             leadId: lead.leadbyteId,
             status: 500,
@@ -166,14 +184,25 @@ export async function GET() {
               }
             );
             const json = await res.json();
-            console.log(`Suppression triggered for lead ${lead.leadbyteId}:`, json);
-            return { leadId: lead.leadbyteId, status: res.status, response: json };
+            debugLogs.push(
+              `Suppression triggered for lead ${lead.leadbyteId}: ${JSON.stringify(json)}`
+            );
+            return {
+              leadId: lead.leadbyteId,
+              status: res.status,
+              response: json,
+            };
           } catch (err) {
-            console.log(`Suppression failed for lead ${lead.leadbyteId}:`, err);
+            debugLogs.push(
+              `Suppression failed for lead ${lead.leadbyteId}: ${String(err)}`
+            );
             return {
               leadId: lead.leadbyteId,
               status: 500,
-              response: { error: "Suppression call failed", details: String(err) },
+              response: {
+                error: "Suppression call failed",
+                details: String(err),
+              },
             };
           }
         })
@@ -183,13 +212,15 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       updatedLeadsCount: leadsToUpdate.length,
+      leadsToUpdate,
       leadbyteResponses,
       suppressionResponses,
+      debugLogs, // <-- all debug logs visible in browser
     });
   } catch (err) {
-    console.error("Days left update failed:", err);
+    debugLogs.push(`Days left update failed: ${String(err)}`);
     return NextResponse.json(
-      { error: "Days left update failed" },
+      { error: "Days left update failed", debugLogs },
       { status: 500 }
     );
   }
