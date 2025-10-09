@@ -34,7 +34,7 @@ export async function GET() {
     const leadsToUpdate: LeadUpdate[] = allLeads
       .map((lead): LeadUpdate | null => {
         const formData = lead.formData as Record<string, any> | undefined;
-        if (!formData) return null;
+        if (!formData || typeof formData !== "object") return null;
 
         const leadbyteId = formData["leadbyte_id"]?.value;
         const expiryDate = formData["expiry_date"]?.value;
@@ -60,15 +60,18 @@ export async function GET() {
       });
     }
 
-    // 1. Update local DB
+    // 1. Update local DB safely
     await Promise.all(
       leadsToUpdate.map((lead) =>
         prisma.leadHistory.update({
           where: { id: lead.dbId },
           data: {
             formData: {
-              ...lead.formData,
-              days_left: { value: lead.newDaysLeft },
+              ...lead.formData, // preserve all existing fields
+              days_left: {
+                ...(lead.formData.days_left || {}), // preserve existing subfields
+                value: lead.newDaysLeft, // only update value
+              },
             },
           },
         })
@@ -95,7 +98,7 @@ export async function GET() {
                 leads: [
                   {
                     id: lead.leadbyteId,
-                    update: { days_left: lead.newDaysLeft },
+                    update: { days_left: lead.newDaysLeft + 1 },
                   },
                 ],
               }),
@@ -164,7 +167,7 @@ export async function GET() {
       success: true,
       updatedLeadsCount: leadsToUpdate.length,
       leadbyteResponses,
-      suppressionResponses, // <-- added suppression responses
+      suppressionResponses,
     });
   } catch (err) {
     console.error("Days left update failed:", err);

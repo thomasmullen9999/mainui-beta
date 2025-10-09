@@ -730,7 +730,30 @@ function App({ params }: { params: { slug: string[] } }) {
 
   async function sendNurtureLead(formData: any) {
     console.log("🚀 sendNurtureLead called with:", formData);
+    let expiryDate = "";
+    let daysLeft;
+    if (formData.still_work_at_store.value === "No") {
+      expiryDate = addDaysToDate(
+        formData.dateleft.value,
+        campaignExpiryValues[formData.campaign.value as CampaignKey]
+      );
+      daysLeft = daysUntil(expiryDate);
+    }
 
+    formData.expiry_date = {
+      label: "Expiry Date",
+      value: expiryDate,
+    };
+
+    formData.days_left = {
+      label: "Days Left",
+      value: daysLeft,
+    };
+
+    formData.leadbyte_id = {
+      label: "Leadbyte ID",
+      value: "",
+    };
     setIsSubmitting(true);
 
     try {
