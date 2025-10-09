@@ -457,7 +457,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const zapierResponse = await fetch(
+  /*   const zapierResponse = await fetch(
     process.env.ZAPIER_LEADTRANSFER_ENDPOINT!,
     {
       method: "POST",
@@ -470,9 +470,24 @@ export async function POST(req: Request) {
     throw new Error("Failed to push lead to Zapier");
   }
 
-  const json = await zapierResponse.json();
+  const json = await zapierResponse.json(); */
 
-  let leadbyteJson = {};
+  const nurtureCampaignNames = {
+    sainsburys: "SAINS-NUR",
+    next: "NEXT-NUR",
+    morrisons: "FP4A",
+    asda: "ASDA-NUR",
+    coop: "COOP-NUR",
+    bolt: "BOLT-NUR",
+    justeat: "JUSTEAT-NUR",
+  };
+
+  type CampaignKey = keyof typeof nurtureCampaignNames;
+
+  const campid =
+    nurtureCampaignNames[formData.campaign.value as CampaignKey] || "TEST-NUR";
+
+  let sainsLeadbyteJson = {};
 
   if (safeValue(formData, "campaign") === "sainsburys") {
     const leadbytePayload = {
@@ -522,18 +537,104 @@ export async function POST(req: Request) {
       }
     );
 
-    leadbyteJson = await leadbyteResponse.json();
+    sainsLeadbyteJson = await leadbyteResponse.json();
 
     if (!leadbyteResponse.ok) {
-      console.error("Leadbyte error:", leadbyteJson);
+      console.error("Leadbyte error:", sainsLeadbyteJson);
       throw new Error("Failed to push lead to Leadbyte");
     }
+  }
+
+  let leadbyteJson = {};
+  function extractStreet1(address: string | undefined): string {
+    if (!address) return "";
+    const parts = address.split(",").map((s) => s.trim());
+    return parts[0] || "";
+  }
+
+  const fv = (key: string) => formData?.[key]?.value ?? "";
+
+  const addressValue = fv("address");
+  const street1Value = fv("street1") || extractStreet1(addressValue);
+
+  const leadbytePayload = {
+    campid: campid ?? "",
+    sid: "3",
+
+    // 🔹 Core info
+    email: fv("email"),
+    firstname: fv("firstname"),
+    lastname: fv("lastname"),
+    dob: fv("dob"),
+    gender: fv("gender"),
+
+    // 🔹 Contact / address info
+    phone1: fv("telphone"),
+    full_address: addressValue,
+    street1: addressValue,
+    street2: fv("street2"),
+    towncity: fv("towncity"),
+    county: fv("county"),
+    postcode: fv("postcode"),
+    country: fv("country") || "United Kingdom",
+
+    // 🔹 Work info
+    storelocation: fv("storelocation"),
+    still_work_at_store: fv("still_work_at_store"),
+    accepted_dba: fv("accepted_dba"),
+    hourlyrate: fv("hourly_rate"),
+    employee_number: fv("employee_number"),
+    ninumber: fv("ninumber"),
+    dateleft: fv("dateleft"),
+
+    // 🔹 UTM / marketing info
+    utm_source: fv("utm_source"),
+    utm_medium: fv("utm_medium"),
+    utm_device: fv("utm_device"),
+    utm_content: fv("utm_content"),
+    utm_campaign: fv("utm_campaign"),
+    utm_term: fv("utm_term"),
+    marketing: fv("futuremarketing"),
+    privacypolicy: fv("privacypolicy") || "Yes",
+
+    // 🔹 Device / tracking info
+    nurture_id: fv("nurture_id"),
+    device: fv("device"),
+    nurture_link:
+      fv("nurture_link") ||
+      `https://claim.fairpayforall.co.uk/${formData?.campaign?.value?.charAt(0)?.toLowerCase() ?? ""}/${nurtureLinkId}`,
+
+    // 🔹 Timing / expiry
+    expiry_date: fv("expiry_date"),
+    days_left: fv("days_left"),
+    latest_step: fv("latest_step"),
+  };
+
+  const leadbyteResponse = await fetch(
+    "https://maddisonclarke.leadbyte.co.uk/restapi/v1.3/leads",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        X_KEY: process.env.LEADBYTE_API_KEY!,
+      },
+      body: JSON.stringify(leadbytePayload),
+    }
+  );
+
+  leadbyteJson = await leadbyteResponse.json();
+
+  console.log(leadbyteJson, "leadbye");
+
+  if (!leadbyteResponse.ok) {
+    console.error("Leadbyte error:", leadbyteJson);
+    throw new Error("Failed to push lead to Leadbyte");
   }
 
   await prisma.leadHistory.update({
     where: { id: newlead.id },
     data: {
-      jsonData: json,
+      jsonData: leadbyteJson,
       lead_status: newlead.lead_status ?? LeadStatus.nurture,
     },
   });
@@ -543,7 +644,7 @@ export async function POST(req: Request) {
   return NextResponse.json(
     {
       lead_id: newlead.id,
-      msg: (json as any).status ?? null,
+      msg: (leadbyteJson as any).status ?? null,
       leadbyte: leadbyteJson,
     },
     { status: 200 }
