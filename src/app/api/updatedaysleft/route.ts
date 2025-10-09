@@ -13,13 +13,11 @@ function daysLeft(targetDateStr: string) {
   return Math.floor(diffMs / (1000 * 60 * 60 * 24));
 }
 
-// Type definition for formData
 type FormData = {
   [key: string]: { value: any } | undefined;
   days_left?: { value: number; [key: string]: any };
 };
 
-// Type for lead updates
 type LeadUpdate = {
   dbId: string;
   leadbyteId: string;
@@ -27,13 +25,12 @@ type LeadUpdate = {
   formData: FormData;
 };
 
-// Utility function to safely update days_left.value
 function updateDaysLeft(formData: FormData, newDaysLeft: number): FormData {
   return {
-    ...formData, // preserve all existing fields
+    ...formData,
     days_left: {
-      ...(formData.days_left || {}), // preserve subfields
-      value: newDaysLeft, // only update value
+      ...(formData.days_left || {}),
+      value: newDaysLeft,
     },
   };
 }
@@ -42,6 +39,7 @@ export async function GET() {
   try {
     const apiKey = process.env.LEADBYTE_API_KEY;
     if (!apiKey) {
+      console.log("Missing LeadByte API key");
       return NextResponse.json(
         { error: "Missing LeadByte API key" },
         { status: 500 }
@@ -49,18 +47,31 @@ export async function GET() {
     }
 
     const allLeads = await prisma.leadHistory.findMany();
+    console.log(`Total leads fetched from DB: ${allLeads.length}`);
 
     const leadsToUpdate: LeadUpdate[] = allLeads
-      .map((lead): LeadUpdate | null => {
+      .map((lead) => {
         const formData = lead.formData as FormData | undefined;
-        if (!formData || typeof formData !== "object") return null;
+
+        if (!formData || typeof formData !== "object") {
+          console.log(`Skipping lead ${lead.id}: invalid or missing formData`);
+          return null;
+        }
 
         const leadbyteId = formData["leadbyte_id"]?.value;
         const expiryDate = formData["expiry_date"]?.value;
 
-        if (!leadbyteId || !expiryDate) return null;
+        if (!leadbyteId || !expiryDate) {
+          console.log(
+            `Skipping lead ${lead.id}: missing leadbyte_id or expiry_date`
+          );
+          return null;
+        }
 
         const newDaysLeft = daysLeft(expiryDate);
+        console.log(
+          `Lead ${lead.id} -> leadbyteId: ${leadbyteId}, expiryDate: ${expiryDate}, daysLeft: ${newDaysLeft}`
+        );
 
         return {
           dbId: lead.id,
@@ -71,6 +82,8 @@ export async function GET() {
       })
       .filter((lead): lead is LeadUpdate => lead !== null);
 
+    console.log(`Leads to update after filtering: ${leadsToUpdate.length}`);
+
     if (leadsToUpdate.length === 0) {
       return NextResponse.json({
         success: true,
@@ -80,19 +93,19 @@ export async function GET() {
     }
 
     // 1. Update local DB safely
-    await Promise.all(
-      leadsToUpdate.map((lead) =>
-        prisma.leadHistory.update({
-          where: { id: lead.dbId },
-          data: {
-            formData: updateDaysLeft(lead.formData, lead.newDaysLeft),
-          },
-        })
-      )
-    );
+    for (const lead of leadsToUpdate) {
+      console.log(`Updating DB for lead ${lead.dbId} with daysLeft ${lead.newDaysLeft}`);
+      await prisma.leadHistory.update({
+        where: { id: lead.dbId },
+        data: {
+          formData: updateDaysLeft(lead.formData, lead.newDaysLeft),
+        },
+      });
+    }
 
     // Separate expired leads
     const expiredLeads = leadsToUpdate.filter((lead) => lead.newDaysLeft < 0);
+    console.log(`Expired leads: ${expiredLeads.length}`);
 
     // 2. Update LeadByte — one request per lead
     const leadbyteResponses = await Promise.all(
@@ -117,14 +130,11 @@ export async function GET() {
               }),
             }
           );
-
           const json = await res.json();
-          return {
-            leadId: lead.leadbyteId,
-            status: res.status,
-            response: json,
-          };
+          console.log(`LeadByte updated lead ${lead.leadbyteId}:`, json);
+          return { leadId: lead.leadbyteId, status: res.status, response: json };
         } catch (err) {
+          console.log(`LeadByte update failed for lead ${lead.leadbyteId}:`, err);
           return {
             leadId: lead.leadbyteId,
             status: 500,
@@ -155,21 +165,15 @@ export async function GET() {
                 }),
               }
             );
-
             const json = await res.json();
-            return {
-              leadId: lead.leadbyteId,
-              status: res.status,
-              response: json,
-            };
+            console.log(`Suppression triggered for lead ${lead.leadbyteId}:`, json);
+            return { leadId: lead.leadbyteId, status: res.status, response: json };
           } catch (err) {
+            console.log(`Suppression failed for lead ${lead.leadbyteId}:`, err);
             return {
               leadId: lead.leadbyteId,
               status: 500,
-              response: {
-                error: "Suppression call failed",
-                details: String(err),
-              },
+              response: { error: "Suppression call failed", details: String(err) },
             };
           }
         })
