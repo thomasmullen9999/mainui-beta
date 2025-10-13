@@ -135,7 +135,7 @@ export async function GET() {
                 leads: [
                   {
                     id: lead.leadbyteId,
-                    update: { days_left: lead.newDaysLeft * 2 },
+                    update: { days_left: lead.newDaysLeft },
                   },
                 ],
               }),
