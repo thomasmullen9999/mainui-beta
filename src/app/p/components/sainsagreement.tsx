@@ -152,13 +152,15 @@ export function SainsMCAgreement({
         `/api/leadtransfer?lead_id=${uuid}&lead_campaign=${slug}`
       );
       if (!response.ok) {
+        const text = await response.text();
+        console.error(`❌ fetchLeadFromId failed (${response.status}):`, text);
         setState((prev) => ({ ...prev, isError: true }));
-        throw new Error("Failed to fetch data");
+        throw new Error(`Failed to fetch data: ${response.statusText}`);
       }
       return await response.json();
     } catch (error) {
+      console.error("❌ Error fetching lead data:", error);
       setState((prev) => ({ ...prev, isError: true }));
-      console.error("Error fetching data:", error);
       throw error;
     }
   };
@@ -191,7 +193,6 @@ export function SainsMCAgreement({
         });
       }
 
-      // Bing tracking for existing leads
       if (uuid) {
         (window as any).uetq = (window as any).uetq || [];
         (window as any).uetq.push("set", {
@@ -203,7 +204,7 @@ export function SainsMCAgreement({
         (window as any).uetq.push("event", "submit_lead_form", {});
       }
     } catch (e) {
-      console.log(e);
+      console.error("⚠️ Tracking error:", e);
     }
   };
 
@@ -225,7 +226,7 @@ export function SainsMCAgreement({
     window.location.href = `${baseUrl}/${page}?email=${email}`;
   };
 
-  // Form handlers
+  // Handlers
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     label: string
@@ -252,7 +253,6 @@ export function SainsMCAgreement({
     const dateField = getDateField();
     const newDateField = getNewDateField();
 
-    // Update the appropriate date field
     if (newDate !== leadData[dateField]?.value) {
       setLeadData((prev) => ({
         ...prev,
@@ -283,7 +283,17 @@ export function SainsMCAgreement({
         body: JSON.stringify({ formData }),
       });
 
+      if (!response.ok) {
+        const text = await response.text();
+        console.error(`❌ leadTransfer failed (${response.status}):`, text);
+        throw new Error(
+          `Server returned ${response.status} (${response.statusText})`
+        );
+      }
+
       const data = await response.json();
+      console.log("✅ leadTransfer response:", data);
+
       if (data.msg) {
         setState((prev) => ({
           ...prev,
@@ -292,9 +302,12 @@ export function SainsMCAgreement({
           isSubmitting: false,
         }));
       }
-    } catch (e) {
+    } catch (e: any) {
+      console.error("❌ leadTransfer error:", e);
+      toast.error(
+        `Network error during leadTransfer: ${e?.message || "Unknown issue"}. Check console for details.`
+      );
       setState((prev) => ({ ...prev, isSubmitting: false }));
-      toast.error("Internet connection Error, please retry later.");
     }
   };
 
@@ -314,7 +327,8 @@ export function SainsMCAgreement({
       value: "Yes",
     };
 
-    console.log(formData, "new place check");
+    console.log("📡 updateLead initiated:", formData);
+
     try {
       const response = await fetch(`/api/leadtransfer`, {
         method: "PUT",
@@ -323,20 +337,20 @@ export function SainsMCAgreement({
         body: JSON.stringify({ lead_id: uuid, formData }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
+        const text = await response.text();
+        console.error(`❌ updateLead failed (${response.status}):`, text);
         setState((prev) => ({ ...prev, isError: true }));
-        throw new Error(`Request failed with status ${response.status}`);
+        throw new Error(`updateLead failed: ${response.statusText}`);
       }
+
+      const data = await response.json();
+      console.log("✅ updateLead success:", data);
 
       if (data.msg) {
         setState((prev) => ({ ...prev, isFinished: true }));
-        // Only send tracking if requested (for billable leads)
-        if (shouldTrack) {
-          sendTracking(formData);
-        }
+        if (shouldTrack) sendTracking(formData);
 
-        // Inside updateLead function
         try {
           const leadByteResponse = await fetch("/api/updateleadbyte", {
             method: "PUT",
@@ -360,35 +374,17 @@ export function SainsMCAgreement({
           });
 
           const leadByteResult = await leadByteResponse.json();
-          console.log("LeadByte API result:", leadByteResult);
+          console.log("✅ LeadByte API result:", leadByteResult);
         } catch (apiError) {
-          console.error("Error calling LeadByte API:", apiError);
+          console.error("❌ Error calling LeadByte API:", apiError);
         }
-
-        // 🔥 New API call to update lead status to "sold"
-        /*         try {
-          const soldResponse = await fetch(`/api/updatetosold`, {
-            method: "PUT",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lead_id: uuid }),
-          });
-
-          if (!soldResponse.ok) {
-            throw new Error(`UpdateToSold failed: ${soldResponse.status}`);
-          }
-
-          const soldData = await soldResponse.json();
-          console.log("Lead status updated to sold:", soldData);
-        } catch (soldError) {
-          console.error("Failed to update lead to sold:", soldError);
-          toast.error("Could not mark lead as sold. Please retry later.");
-        } */
       }
-    } catch (e) {
+    } catch (e: any) {
+      console.error("❌ updateLead exception:", e);
+      toast.error(
+        `Error updating lead: ${e?.message || "Unknown error"}. See console for more info.`
+      );
       setState((prev) => ({ ...prev, isSubmitting: false }));
-      toast.error("Internet connection Error, please retry later.");
-      console.log(e);
     }
   };
 
@@ -415,7 +411,6 @@ export function SainsMCAgreement({
             return;
           }
 
-          // Initialize new date fields
           rtLead.formData.new_dateleft = { label: "new dateleft", value: "" };
           rtLead.formData.new_still_work_at_store = {
             label: "new_still_work_at_store",
@@ -433,14 +428,14 @@ export function SainsMCAgreement({
           setState((prev) => ({
             ...prev,
             isNurture: true,
-            isLoading: false, // Critical: Set loading to false
+            isLoading: false,
             stillWorking: rtLead.formData.still_work_at_store?.value === "yes",
           }));
 
           sendTracking(rtLead.formData);
         } catch (error) {
+          console.error("❌ fetchData error:", error);
           setState((prev) => ({ ...prev, isError: true, isLoading: false }));
-          console.error("Error fetching lead:", error);
         }
       } else {
         setState((prev) => ({ ...prev, isLoading: false }));
@@ -459,6 +454,7 @@ export function SainsMCAgreement({
       }, 1000);
     }
   }, [state.isFinished, slug]);
+
   const dateField = getDateField();
   const newDateField = getNewDateField();
   const hasDateValue = leadData[dateField]?.value !== "";
