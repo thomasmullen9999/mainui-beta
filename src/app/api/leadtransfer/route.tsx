@@ -303,7 +303,6 @@ export async function PUT(req: Request) {
   }
 
   console.log("📦 lead_id:", lead_id);
-
   const date = new Date();
 
   let checkdata;
@@ -375,7 +374,6 @@ export async function PUT(req: Request) {
     label: "Lead Sold Timestamp",
     value: getLondonTime(),
   };
-
   newFormData.lb_campaign = {
     label: "Leadbyte Campaign",
     value: toLeadByteCampaignBillable(
@@ -383,27 +381,24 @@ export async function PUT(req: Request) {
       formData
     ),
   };
-
   newFormData.lb_accepted_dba = { label: "Accepted DBA", value: "Yes" };
   newFormData.lead_status = { label: "Lead Status", value: "sold" };
   newFormData.latest_step = { label: "Latest Step", value: "Completed" };
 
-  console.log("📤 Updating to sold...");
+  console.log("📤 Updating lead directly via Prisma...");
+
   try {
-    const internalRes = await fetch(
-      `${process.env.BASE_URL}/api/updatetosold`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newFormData),
-      }
-    );
+    const updatedLead = await prisma.leadHistory.update({
+      where: { id: checkdata.id }, // use the actual DB primary key
+      data: {
+        lead_status: "sold",
+        formData: newFormData,
+        lead_sold_timestamp: date,
+        lead_sold_timestamp_txt: newFormData.lead_sold_timestamp.value,
+      },
+    });
 
-    const internalText = await internalRes.text();
-    console.log("📬 Internal API response:", internalRes.status, internalText);
-
-    if (!internalRes.ok)
-      throw new Error(`Internal API failed: ${internalRes.status}`);
+    console.log("✅ Lead successfully updated:", updatedLead.id);
 
     // Continue with your tracking
     await server_marketing_tracking(
@@ -411,24 +406,12 @@ export async function PUT(req: Request) {
       req.headers.get("x-real-ip") || "127.0.0.1"
     );
 
-    // Update database
-    const updated = await prisma.leadHistory.update({
-      where: { id: checkdata.id },
-      data: {
-        formData: newFormData,
-        lead_status: LeadStatus.sold,
-        lead_sold_timestamp_txt: newFormData.lead_sold_timestamp.value,
-        lead_sold_timestamp: date,
-      },
-    });
-
-    console.log("✅ Lead successfully updated:", updated.id);
     return NextResponse.json(
-      { success: true, msg: "Lead successfully updated" },
+      { success: true, msg: "Lead successfully updated to sold" },
       { status: 200 }
     );
   } catch (err: any) {
-    console.error("🔥 PUT /leadtransfer error:", err);
+    console.error("🔥 Error updating lead:", err);
     return NextResponse.json(
       { success: false, msg: err.message || "Lead update failed" },
       { status: 500 }

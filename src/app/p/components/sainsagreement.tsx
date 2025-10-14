@@ -330,6 +330,7 @@ export function SainsMCAgreement({
     console.log("📡 updateLead initiated:", formData);
 
     try {
+      // ✅ All logic handled in /api/leadtransfer now
       const response = await fetch(`/api/leadtransfer`, {
         method: "PUT",
         credentials: "include",
@@ -351,38 +352,13 @@ export function SainsMCAgreement({
         setState((prev) => ({ ...prev, isFinished: true }));
         if (shouldTrack) sendTracking(formData);
 
-        // ✅ FIX: Safe absolute URL for /api/updatetosold
-        const baseUrl =
-          typeof window !== "undefined"
-            ? window.location.origin
-            : "https://mainui-beta.vercel.app";
-
-        try {
-          const soldResponse = await fetch(`${baseUrl}/api/updatetosold`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lead_id: uuid }),
-          });
-
-          if (!soldResponse.ok) {
-            const soldText = await soldResponse.text();
-            console.error(
-              `❌ /api/updatetosold failed (${soldResponse.status}):`,
-              soldText
-            );
-          } else {
-            console.log("✅ /api/updatetosold success");
-          }
-        } catch (soldError) {
-          console.error("❌ Error calling /api/updatetosold:", soldError);
-        }
-
-        // Update LeadByte
+        // ✅ LeadByte sync
         try {
           const leadByteResponse = await fetch("/api/updateleadbyte", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              id: uuid,
               leadbyteId,
               leadData: {
                 accepted_dba: formData.lb_accepted_dba?.value ?? "Yes",
@@ -477,7 +453,7 @@ export function SainsMCAgreement({
     if (state.isFinished) {
       setState((prev) => ({ ...prev, showMessage: true }));
       setTimeout(() => {
-        handleThankYouRedirect(slug);
+        // handleThankYouRedirect(slug);
       }, 1000);
     }
   }, [state.isFinished, slug]);
